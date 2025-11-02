@@ -1,5 +1,6 @@
 # Project artifacts
 *.json
+dist/
 
 # Cache from requests_cache
 .cache*

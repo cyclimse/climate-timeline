@@ -239,7 +239,7 @@ fn make_tooltip(sample: model.Sample) -> String {
   let date_str =
     int.to_string(sample.date.year)
     <> "-"
-    <> int.to_string(sample.date.month |> month_to_int)
+    <> int.to_string(sample.date.month |> calendar.month_to_int)
     <> "-"
     <> int.to_string(sample.date.day)
 
@@ -251,21 +251,4 @@ fn make_tooltip(sample: model.Sample) -> String {
   }
 
   date_str <> ": " <> temp_str <> hist_str
-}
-
-fn month_to_int(month) -> Int {
-  case month {
-    calendar.January -> 1
-    calendar.February -> 2
-    calendar.March -> 3
-    calendar.April -> 4
-    calendar.May -> 5
-    calendar.June -> 6
-    calendar.July -> 7
-    calendar.August -> 8
-    calendar.September -> 9
-    calendar.October -> 10
-    calendar.November -> 11
-    calendar.December -> 12
-  }
 }
