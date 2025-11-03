@@ -14,11 +14,16 @@ import page
 
 const root_dir = ".."
 
+const events = root_dir <> "/events.json"
+
 const data_dir = root_dir <> "/data"
 
 const output_dir = root_dir <> "/dist"
 
 pub fn main() {
+  let assert Ok(events) = model.read_events_from_file(events)
+    as "reading events file"
+
   let assert Ok(climate_data_files) = simplifile.read_directory(data_dir)
     as "listing data directory"
 
@@ -78,7 +83,7 @@ pub fn main() {
           io.println("Generating page for " <> string.capitalise(city_name))
 
           // This is the slowest part:
-          let content = infographic.from(samples)
+          let content = infographic.from(events:, samples:)
 
           let path = directory <> "/" <> city_name_lower <> ".html"
           must_write_page(path, title, city_names, city_name_lower, content)

@@ -59,5 +59,35 @@ pub fn read_samples_from_file(file_path: String) -> Result(List(Sample)) {
 }
 
 pub type Event {
-  Event(date: calendar.Date, description: String)
+  Event(
+    id: String,
+    display_name: String,
+    date: calendar.Date,
+    description: String,
+    wiki_link: String,
+  )
+}
+
+fn event_decoder() -> decode.Decoder(Event) {
+  use id <- decode.field("id", decode.string)
+  use display_name <- decode.field("display_name", decode.string)
+  use date <- decode.field("date", decode_date())
+  use description <- decode.field("description", decode.string)
+  use wiki_link <- decode.field("wiki_link", decode.string)
+  decode.success(Event(id:, display_name:, date:, description:, wiki_link:))
+}
+
+pub fn read_events_from_file(file_path: String) -> Result(List(Event)) {
+  use data <- result.try(
+    simplifile.read(file_path) |> snag.map_error(simplifile.describe_error),
+  )
+
+  use events <- result.try(
+    json.parse(data, decode.list(event_decoder()))
+    |> snag.map_error(fn(e) {
+      "decoding events from " <> file_path <> ": " <> string.inspect(e)
+    }),
+  )
+
+  Ok(events)
 }

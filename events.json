@@ -1,0 +1,44 @@
+[
+    {
+        "id": "paris_agreement_2016",
+        "display_name": "Signature of the Paris Agreement",
+        "date": "2016-04-22",
+        "description": "The Paris Agreement, a landmark international accord to combat climate change, was signed by 175 countries on Earth Day. The agreement aims to limit global warming to well below 2 degrees Celsius above pre-industrial levels, with efforts to limit the increase to 1.5 degrees Celsius.",
+        "wiki_link": "https://en.wikipedia.org/wiki/Paris_Agreement"
+    },
+    {
+        "id": "kyoto_protocol_1997",
+        "display_name": "Adoption of the Kyoto Protocol",
+        "date": "1997-12-11",
+        "description": "The Kyoto Protocol, an international treaty that commits its parties to reduce greenhouse gas emissions, was adopted in Kyoto, Japan. It was the first significant step towards global cooperation in addressing climate change.",
+        "wiki_link": "https://en.wikipedia.org/wiki/Kyoto_Protocol"
+    },
+    {
+        "id": "ipcc_establishment_1988",
+        "display_name": "Establishment of the Intergovernmental Panel on Climate Change (IPCC)",
+        "date": "1988-11-01",
+        "description": "The IPCC was established by the United Nations to provide scientific assessments on climate change, its impacts, and potential future risks, as well as to propose adaptation and mitigation strategies.",
+        "wiki_link": "https://en.wikipedia.org/wiki/Intergovernmental_Panel_on_Climate_Change"
+    },
+    {
+        "id": "earth_day_1970",
+        "display_name": "First Earth Day",
+        "date": "1970-04-22",
+        "description": "The first Earth Day was celebrated, marking the beginning of the modern environmental movement.",
+        "wiki_link": "https://en.wikipedia.org/wiki/Earth_Day"
+    },
+    {
+        "id": "montreal_protocol_1987",
+        "display_name": "Adoption of the Montreal Protocol",
+        "date": "1987-09-16",
+        "description": "The Montreal Protocol on Substances that Deplete the Ozone Layer was adopted to phase out the production and consumption of ozone-depleting substances.",
+        "wiki_link": "https://en.wikipedia.org/wiki/Montreal_Protocol"
+    },
+    {
+        "id": "us_withdrawal_paris_2025",
+        "display_name": "U.S. Withdrawal from the Paris Agreement",
+        "date": "2025-01-20",
+        "description": "The United States officially withdrew from the Paris Agreement under the second term of President Donald Trump, citing concerns over economic impacts and national sovereignty.",
+        "wiki_link": "https://en.wikipedia.org/wiki/United_States_withdrawal_from_the_Paris_Agreement"
+    }
+]

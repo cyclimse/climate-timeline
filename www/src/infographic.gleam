@@ -13,7 +13,10 @@ import lustre/element/html
 
 import model
 
-pub fn from(samples: List(model.Sample)) -> Element(msg) {
+pub fn from(
+  events events: List(model.Event),
+  samples samples: List(model.Sample),
+) -> Element(msg) {
   let years =
     samples
     |> list.map(fn(sample) { sample.date.year })
