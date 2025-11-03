@@ -53,6 +53,11 @@ fn head(title: String) -> Element(msg) {
         "https://cdn.jsdelivr.net/npm/@fylgja/utilities/index.min.css",
       ),
     ]),
+    element.element("style", [], [
+      element.text(
+        "@media (max-width: 500px) { .month-label { display: none !important; } .month-grid { grid-template-columns: 1fr !important; } }",
+      ),
+    ]),
     html.title([], title),
   ])
 }

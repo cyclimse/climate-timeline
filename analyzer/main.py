@@ -1,10 +1,21 @@
 from datetime import timedelta, date
+import logging
+import os
 
 import polars as pl
 import openmeteo_requests
 import requests_cache
 import niquests
+
 from retry_requests import retry
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(ROOT_DIR, "data")
+START_YEAR = 1979
+END_YEAR = 2023
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class ClimateAnalyzer:
@@ -135,22 +146,34 @@ class ClimateAnalyzer:
 
 def main():
     analyzer = ClimateAnalyzer()
-    city_name = "Berlin"
-    start_date = date(2010, 1, 1)
-    end_date = date(2023, 12, 31)
+    start_date = date(START_YEAR, 1, 1)
+    end_date = date(END_YEAR, 12, 31)
 
-    df = analyzer.analyze_for_city(
-        city_name=city_name,
-        start_date=start_date,
-        end_date=end_date,
-    )
+    # Prepare output directory
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    print(df.describe())
+    with open(os.path.join(ROOT_DIR, "cities.txt"), "r") as f:
+        city_names = f.readlines()
 
-    data = df.write_json()
+    for city_name in city_names:
+        city_name = city_name.strip()
 
-    with open(f"climate_data_{city_name.lower()}.json", "w") as f:
-        f.write(data)
+        logger.info(f"Analyzing climate data for {city_name}")
+
+        df = analyzer.analyze_for_city(
+            city_name=city_name,
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        logger.info(f"Finished analyzing climate data for {city_name}")
+
+        print(df.head())
+
+        data = df.write_json()
+
+        with open(f"{OUTPUT_DIR}/climate_data_{city_name.lower()}.json", "w") as f:
+            f.write(data)
 
 
 if __name__ == "__main__":

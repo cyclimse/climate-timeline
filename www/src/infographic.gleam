@@ -64,7 +64,6 @@ pub fn from(samples: List(model.Sample)) -> Element(msg) {
 }
 
 fn render_temperature_legend() -> Element(msg) {
-  let legend_width = 400
   let legend_height = 20
 
   html.div(
@@ -73,8 +72,9 @@ fn render_temperature_legend() -> Element(msg) {
         #("margin", "1.5rem 0"),
         #("display", "flex"),
         #("flex-direction", "column"),
-        #("align-items", "center"),
         #("gap", "0.5rem"),
+        #("width", "100%"),
+        #("max-width", "800px"),
       ]),
     ],
     [
@@ -83,11 +83,16 @@ fn render_temperature_legend() -> Element(msg) {
         "http://www.w3.org/2000/svg",
         "svg",
         [
-          attribute.attribute("width", int.to_string(legend_width)),
-          attribute.attribute("height", int.to_string(legend_height)),
+          attribute.attribute(
+            "viewBox",
+            "0 0 400 " <> int.to_string(legend_height),
+          ),
+          attribute.attribute("preserveAspectRatio", "none"),
           attribute.styles([
             #("border-radius", "4px"),
             #("border", "1px solid #ddd"),
+            #("width", "100%"),
+            #("height", int.to_string(legend_height) <> "px"),
           ]),
         ],
         [
@@ -157,7 +162,7 @@ fn render_temperature_legend() -> Element(msg) {
             "http://www.w3.org/2000/svg",
             "rect",
             [
-              attribute.attribute("width", int.to_string(legend_width)),
+              attribute.attribute("width", "400"),
               attribute.attribute("height", int.to_string(legend_height)),
               attribute.attribute("fill", "url(#temp-gradient)"),
             ],
@@ -171,7 +176,7 @@ fn render_temperature_legend() -> Element(msg) {
           attribute.styles([
             #("display", "flex"),
             #("justify-content", "space-between"),
-            #("width", int.to_string(legend_width) <> "px"),
+            #("width", "100%"),
             #("font-size", "0.75rem"),
             #("color", "#666"),
           ]),
@@ -216,7 +221,6 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
   let square_size = 12
   let gap = 3
   let cell_size = square_size + gap
-  let month_label_width = 40
 
   // Group samples by month
   let samples_by_month =
@@ -242,8 +246,6 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
   // Calculate max days in any month (31) for consistent width
   let max_days = 31
   let svg_width = max_days * cell_size
-  let svg_height = 12 * cell_size
-  // 12 months
 
   html.div(
     [
@@ -263,83 +265,72 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
         ],
         [html.text(int.to_string(year))],
       ),
+      // CSS Grid container with 2 columns: labels and SVG
       html.div(
         [
+          attribute.class("month-grid"),
           attribute.styles([
-            #("display", "flex"),
-            #("gap", "0.5rem"),
-            #("align-items", "flex-start"),
+            #("display", "grid"),
+            #("grid-template-columns", "3rem 1fr"),
+            #("grid-template-rows", "repeat(12, 1fr)"),
+            #("gap", "0"),
+            #("width", "100%"),
           ]),
         ],
-        [
-          // Month labels column
-          html.div(
-            [
-              attribute.styles([
-                #("display", "flex"),
-                #("flex-direction", "column"),
-                #("gap", "0"),
-                #("padding-top", "0"),
-                #("width", int.to_string(month_label_width) <> "px"),
-              ]),
-            ],
-            list.map(months, fn(month_info) {
-              let #(_month, label) = month_info
-              html.div(
-                [
-                  attribute.styles([
-                    #("font-size", "0.75rem"),
-                    #("color", "#666"),
-                    #("text-align", "right"),
-                    #("padding-right", "0.5rem"),
-                    #("height", int.to_string(cell_size) <> "px"),
-                    #("display", "flex"),
-                    #("align-items", "center"),
-                    #("justify-content", "flex-end"),
-                  ]),
-                ],
-                [html.text(label)],
-              )
-            }),
-          ),
-          // SVG with all months
-          element.namespaced(
-            "http://www.w3.org/2000/svg",
-            "svg",
-            [
-              attribute.attribute("width", int.to_string(svg_width)),
-              attribute.attribute("height", int.to_string(svg_height)),
-              attribute.attribute(
-                "viewBox",
-                "0 0 "
-                  <> int.to_string(svg_width)
-                  <> " "
-                  <> int.to_string(svg_height),
-              ),
-              attribute.styles([
-                #("display", "block"),
-                #("overflow", "visible"),
-              ]),
-            ],
-            // Render each month's data
-            list.index_map(months, fn(month_info, month_index) {
-              let #(month, _label) = month_info
-              let month_samples =
-                dict.get(samples_by_month, month)
-                |> option.from_result
-                |> option.unwrap([])
+        // Interleave month labels and SVG rows
+        list.index_map(months, fn(month_info, _month_index) {
+          let #(month, label) = month_info
+          let month_samples =
+            dict.get(samples_by_month, month)
+            |> option.from_result
+            |> option.unwrap([])
 
-              render_month_paths(month_samples, month_index, square_size, gap)
-            })
-              |> list.flatten,
-          ),
-        ],
+          [
+            // Month label (left column)
+            html.div(
+              [
+                attribute.class("month-label"),
+                attribute.styles([
+                  #("font-size", "0.75rem"),
+                  #("color", "#666"),
+                  #("text-align", "right"),
+                  #("padding-right", "0.5rem"),
+                  #("display", "flex"),
+                  #("align-items", "center"),
+                  #("justify-content", "flex-end"),
+                ]),
+              ],
+              [html.text(label)],
+            ),
+            // SVG for this month's row (right column)
+            element.namespaced(
+              "http://www.w3.org/2000/svg",
+              "svg",
+              [
+                attribute.attribute(
+                  "viewBox",
+                  "0 0 "
+                    <> int.to_string(svg_width)
+                    <> " "
+                    <> int.to_string(cell_size),
+                ),
+                attribute.styles([
+                  #("display", "block"),
+                  #("width", "100%"),
+                  #("height", "100%"),
+                ]),
+              ],
+              render_month_paths_single_row(month_samples, 0, square_size, gap),
+            ),
+          ]
+        })
+          |> list.flatten,
       ),
     ],
   )
 }
 
-fn render_month_paths(
+fn render_month_paths_single_row(
   samples: List(model.Sample),
   month_index: Int,
   square_size: Int,
