@@ -1,8 +1,16 @@
+import gleam/list
+import gleam/string
+
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 
-pub fn from(title: String, inner: Element(msg)) -> Element(msg) {
+pub fn from(
+  title: String,
+  cities: List(String),
+  current_city: String,
+  inner: Element(msg),
+) -> Element(msg) {
   html.html(
     [
       attribute.styles([
@@ -21,7 +29,7 @@ pub fn from(title: String, inner: Element(msg)) -> Element(msg) {
           ]),
         ],
         [
-          navbar(),
+          navbar(cities, current_city),
           inner,
         ],
       ),
@@ -62,11 +70,13 @@ fn head(title: String) -> Element(msg) {
   ])
 }
 
-fn navbar() -> Element(msg) {
+fn navbar(cities: List(String), current_city: String) -> Element(msg) {
   html.header(
     [
       attribute.class("page-header"),
-      attribute.class("sticky"),
+      attribute.styles([
+        #("margin-bottom", "2rem"),
+      ])
     ],
     [
       html.div(
@@ -77,15 +87,65 @@ fn navbar() -> Element(msg) {
           attribute.class("gap"),
         ],
         [
-          html.div([], [html.text("My Blog")]),
+          html.div(
+            [
+              attribute.styles([
+                #("font-size", "1.5rem"),
+                #("font-weight", "600"),
+              ]),
+            ],
+            [
+              html.text(
+                "Climate Infographic for " <> string.capitalise(current_city),
+              ),
+            ],
+          ),
           html.nav(
             [
               attribute.class("flex"),
               attribute.class("gap"),
+              attribute.class("align"),
             ],
             [
-              html.a([attribute.href("/")], [html.text("Home")]),
-              html.a([attribute.href("/about.html")], [html.text("About")]),
+              html.label(
+                [
+                  attribute.styles([
+                    #("display", "flex"),
+                    #("align-items", "center"),
+                    #("gap", "0.5rem"),
+                  ]),
+                ],
+                [
+                  html.text("City: "),
+                  html.select(
+                    [
+                      attribute.attribute(
+                        "onchange",
+                        "location.href = this.value",
+                      ),
+                      attribute.styles([
+                        #("padding", "0.25rem 0.5rem"),
+                        #("border-radius", "4px"),
+                        #("border", "1px solid #ccc"),
+                      ]),
+                    ],
+                    list.map(cities, fn(city) {
+                      let is_current = city == current_city
+                      element.element(
+                        "option",
+                        [
+                          attribute.value(city <> ".html"),
+                          case is_current {
+                            True -> attribute.selected(True)
+                            False -> attribute.none()
+                          },
+                        ],
+                        [html.text(string.capitalise(city))],
+                      )
+                    }),
+                  ),
+                ],
+              ),
             ],
           ),
         ],

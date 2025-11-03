@@ -13,7 +13,7 @@ import lustre/element/html
 
 import model
 
-pub fn from(city_name: String, samples: List(model.Sample)) -> Element(msg) {
+pub fn from(samples: List(model.Sample)) -> Element(msg) {
   let years =
     samples
     |> list.map(fn(sample) { sample.date.year })
@@ -36,9 +36,6 @@ pub fn from(city_name: String, samples: List(model.Sample)) -> Element(msg) {
       ]),
     ],
     [
-      html.h2([], [
-        html.text("Climate Infographic for " <> string.capitalise(city_name)),
-      ]),
       html.p(
         [
           attribute.styles([

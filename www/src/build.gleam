@@ -45,13 +45,20 @@ pub fn main() {
           <> string.lowercase(city_name)
           <> ".json"
 
-        io.println("Reading data for " <> string.capitalise(city_name) <> " from " <> file_path)
+        io.println(
+          "Reading data for "
+          <> string.capitalise(city_name)
+          <> " from "
+          <> file_path,
+        )
 
         let assert Ok(samples) = model.read_samples_from_file(file_path)
         #(city_name, samples)
       },
       5000,
     )
+
+  let city_names = list.map(cities, string.lowercase)
 
   let assert Ok(Nil) = {
     use directory <- temporary.create(temporary.directory())
@@ -62,15 +69,16 @@ pub fn main() {
         samples,
         fn(pair) {
           let #(city_name, samples) = pair
+          let city_name_lower = string.lowercase(city_name)
           let title = "Climate Data for " <> string.capitalise(city_name)
 
           io.println("Generating page for " <> string.capitalise(city_name))
 
           // This is the slowest part:
-          let content = infographic.from(city_name, samples)
+          let content = infographic.from(samples)
 
-          let path = directory <> "/" <> string.lowercase(city_name) <> ".html"
-          must_write_page(path, title, content)
+          let path = directory <> "/" <> city_name_lower <> ".html"
+          must_write_page(path, title, city_names, city_name_lower, content)
           Nil
         },
         5000,
@@ -87,10 +95,16 @@ pub fn main() {
   }
 }
 
-fn must_write_page(path: String, title: String, content: Element(msg)) -> Nil {
+fn must_write_page(
+  path: String,
+  title: String,
+  cities: List(String),
+  current_city: String,
+  content: Element(msg),
+) -> Nil {
   let assert Ok(Nil) =
     content
-    |> page.from(title, _)
+    |> page.from(title, cities, current_city, _)
     |> element.to_document_string
     |> simplifile.write(to: path)
   Nil
