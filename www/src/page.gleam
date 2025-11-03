@@ -67,9 +67,7 @@ fn flygja_css(subpackage: String) -> Element(msg) {
   html.link([
     attribute.rel("stylesheet"),
     attribute.href(
-      "https://cdn.jsdelivr.net/npm/@fylgja/"
-      <> subpackage
-      <> "/index.min.css",
+      "https://cdn.jsdelivr.net/npm/@fylgja/" <> subpackage <> "/index.min.css",
     ),
   ])
 }
@@ -87,7 +85,7 @@ fn head(title: String) -> Element(msg) {
     flygja_css("card"),
     element.element("style", [], [
       element.text(
-        "@media (max-width: 500px) { .month-label { display: none !important; } .month-grid { grid-template-columns: 1fr !important; } }",
+        "@media (max-width: 500px) { .month-label { display: none !important; } .month-grid { grid-template-columns: 1fr !important; } } @media (max-width: 1200px) { .year-events { display: none !important; } } .event-card:hover { transform: scale(1.02); transition: transform 0.2s ease; box-shadow: 0 4px 12px rgba(255,0,255,0.2); }",
       ),
     ]),
     html.title([], title),

@@ -13,6 +13,8 @@ import lustre/element/html
 
 import model
 
+const event_highlight_color = "#0000FF"
+
 pub fn from(samples: List(model.Sample)) -> Element(msg) {
   let years =
     samples
@@ -217,7 +219,9 @@ fn render_heatmap(samples: List(model.Sample)) -> Element(msg) {
 
   html.div(
     [
+      attribute.class("heatmap-container"),
       attribute.styles([
+        #("position", "relative"),
         #("display", "flex"),
         #("flex-direction", "column"),
         #("gap", "3rem"),
@@ -240,6 +244,22 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
   let samples_by_month =
     samples
     |> list.group(fn(sample) { sample.date.month })
+
+  // Get all events for this year
+  let year_events =
+    samples
+    |> list.filter_map(fn(sample) {
+      case sample.event {
+        option.Some(event) if event.date.year == year -> Ok(event)
+        _ -> Error(Nil)
+      }
+    })
+    |> list.unique
+
+  // Group events by month
+  let events_by_month =
+    year_events
+    |> list.group(fn(event) { event.date.month })
 
   // Get all 12 months in order
   let months = [
@@ -267,6 +287,7 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
         #("display", "flex"),
         #("flex-direction", "column"),
         #("gap", "0.5rem"),
+        #("position", "relative"),
       ]),
     ],
     [
@@ -279,66 +300,123 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
         ],
         [html.text(int.to_string(year))],
       ),
-      // CSS Grid container with 2 columns: labels and SVG
+      // Wrapper for grid and event cards
       html.div(
         [
-          attribute.class("month-grid"),
           attribute.styles([
-            #("display", "grid"),
-            #("grid-template-columns", "3rem 1fr"),
-            #("grid-template-rows", "repeat(12, 1fr)"),
-            #("gap", "0"),
-            #("width", "100%"),
+            #("position", "relative"),
           ]),
         ],
-        // Interleave month labels and SVG rows
-        list.index_map(months, fn(month_info, _month_index) {
-          let #(month, label) = month_info
-          let month_samples =
-            dict.get(samples_by_month, month)
-            |> option.from_result
-            |> option.unwrap([])
+        [
+          // CSS Grid container with 2 columns: labels and SVG (full width)
+          html.div(
+            [
+              attribute.class("month-grid"),
+              attribute.styles([
+                #("display", "grid"),
+                #("grid-template-columns", "2.5rem 1fr"),
+                #("gap", "0"),
+                #("width", "100%"),
+              ]),
+            ],
+            // Month labels and SVG rows
+            list.index_map(months, fn(month_info, _month_index) {
+              let #(month, label) = month_info
+              let month_samples =
+                dict.get(samples_by_month, month)
+                |> option.from_result
+                |> option.unwrap([])
 
-          [
-            // Month label (left column)
-            html.div(
               [
-                attribute.class("month-label"),
-                attribute.styles([
-                  #("font-size", "0.75rem"),
-                  #("color", "#666"),
-                  #("text-align", "right"),
-                  #("padding-right", "0.5rem"),
-                  #("display", "flex"),
-                  #("align-items", "center"),
-                  #("justify-content", "flex-end"),
-                ]),
-              ],
-              [html.text(label)],
-            ),
-            // SVG for this month's row (right column)
-            element.namespaced(
-              "http://www.w3.org/2000/svg",
-              "svg",
-              [
-                attribute.attribute(
-                  "viewBox",
-                  "0 0 "
-                    <> int.to_string(svg_width)
-                    <> " "
-                    <> int.to_string(cell_size),
+                // Month label (left column)
+                html.div(
+                  [
+                    attribute.class("month-label"),
+                    attribute.styles([
+                      #("font-size", "0.75rem"),
+                      #("color", "#666"),
+                      #("text-align", "right"),
+                      #("padding-right", "0.5rem"),
+                      #("display", "flex"),
+                      #("align-items", "center"),
+                      #("justify-content", "flex-end"),
+                    ]),
+                  ],
+                  [html.text(label)],
                 ),
-                attribute.styles([
-                  #("display", "block"),
-                  #("width", "100%"),
-                  #("height", "100%"),
-                ]),
-              ],
-              render_month_paths_single_row(month_samples, 0, square_size, gap),
-            ),
-          ]
-        })
-          |> list.flatten,
+                // SVG for this month's row (right column)
+                element.namespaced(
+                  "http://www.w3.org/2000/svg",
+                  "svg",
+                  [
+                    attribute.attribute(
+                      "viewBox",
+                      "0 0 "
+                        <> int.to_string(svg_width)
+                        <> " "
+                        <> int.to_string(cell_size),
+                    ),
+                    attribute.styles([
+                      #("display", "block"),
+                      #("width", "100%"),
+                      #("height", "100%"),
+                      #("overflow", "visible"),
+                    ]),
+                  ],
+                  list.flatten([
+                    render_month_paths_single_row(
+                      month_samples,
+                      0,
+                      square_size,
+                      gap,
+                    ),
+                    render_month_event_highlights(
+                      month_samples,
+                      0,
+                      square_size,
+                      gap,
+                    ),
+                  ]),
+                ),
+              ]
+            })
+              |> list.flatten,
+          ),
+          // Event cards positioned absolutely on the right
+          html.div(
+            [
+              attribute.class("year-events"),
+              attribute.styles([
+                #("position", "absolute"),
+                #("left", "calc(100% + 1rem)"),
+                #("top", "0"),
+                #("width", "280px"),
+              ]),
+            ],
+            list.index_map(months, fn(month_info, month_idx) {
+              let #(month, _label) = month_info
+              let month_events =
+                dict.get(events_by_month, month)
+                |> option.from_result
+                |> option.unwrap([])
+
+              case list.first(month_events) {
+                Ok(event) ->
+                  html.div(
+                    [
+                      attribute.styles([
+                        #("position", "absolute"),
+                        #("top", int.to_string(month_idx * 15) <> "px"),
+                        #("width", "100%"),
+                      ]),
+                    ],
+                    [render_event_card_inline(event)],
+                  )
+                Error(_) -> html.div([], [])
+              }
+            }),
+          ),
+        ],
       ),
     ],
   )
@@ -363,6 +441,123 @@ fn render_month_paths_single_row(
     let #(color, month_samples) = group
     render_month_color_path(color, month_samples, month_index, square_size, gap)
   })
+}
+
+fn render_month_event_highlights(
+  samples: List(model.Sample),
+  month_index: Int,
+  square_size: Int,
+  gap: Int,
+) -> List(Element(msg)) {
+  // Filter samples that have events
+  let samples_with_events =
+    samples
+    |> list.filter(fn(sample) {
+      case sample.event {
+        option.Some(_) -> True
+        option.None -> False
+      }
+    })
+
+  // Render highlight border for each event day
+  list.map(samples_with_events, fn(sample) {
+    render_event_highlight(sample, month_index, square_size, gap)
+  })
+}
+
+fn render_event_highlight(
+  sample: model.Sample,
+  month_index: Int,
+  square_size: Int,
+  gap: Int,
+) -> Element(msg) {
+  let cell_size = square_size + gap
+  let y_offset = month_index * cell_size
+  let day = sample.date.day
+  let x = { day - 1 } * cell_size
+  let y = y_offset
+
+  let stroke_width = 3
+  let radius = 2
+
+  // Create a rounded rectangle outline for the event highlight
+  let x_str = int.to_string(x)
+  let y_str = int.to_string(y)
+  let x_r_str = int.to_string(x + radius)
+  let y_r_str = int.to_string(y + radius)
+  let x_w_str = int.to_string(x + square_size)
+  let y_h_str = int.to_string(y + square_size)
+  let x_w_r_str = int.to_string(x + square_size - radius)
+  let y_h_r_str = int.to_string(y + square_size - radius)
+
+  let path_data =
+    "M"
+    <> x_r_str
+    <> ","
+    <> y_str
+    <> " L"
+    <> x_w_r_str
+    <> ","
+    <> y_str
+    <> " Q"
+    <> x_w_str
+    <> ","
+    <> y_str
+    <> " "
+    <> x_w_str
+    <> ","
+    <> y_r_str
+    <> " L"
+    <> x_w_str
+    <> ","
+    <> y_h_r_str
+    <> " Q"
+    <> x_w_str
+    <> ","
+    <> y_h_str
+    <> " "
+    <> x_w_r_str
+    <> ","
+    <> y_h_str
+    <> " L"
+    <> x_r_str
+    <> ","
+    <> y_h_str
+    <> " Q"
+    <> x_str
+    <> ","
+    <> y_h_str
+    <> " "
+    <> x_str
+    <> ","
+    <> y_h_r_str
+    <> " L"
+    <> x_str
+    <> ","
+    <> y_r_str
+    <> " Q"
+    <> x_str
+    <> ","
+    <> y_str
+    <> " "
+    <> x_r_str
+    <> ","
+    <> y_str
+    <> " Z"
+
+  element.namespaced(
+    "http://www.w3.org/2000/svg",
+    "path",
+    [
+      attribute.attribute("d", path_data),
+      attribute.attribute("fill", "none"),
+      attribute.attribute("stroke", event_highlight_color),
+      attribute.attribute("stroke-width", int.to_string(stroke_width)),
+      attribute.attribute("class", "event-highlight"),
+      attribute.styles([#("pointer-events", "none")]),
+    ],
+    [],
+  )
 }
 
 fn render_month_color_path(
@@ -529,4 +724,87 @@ fn quantize_value(value: Float, step: Float) -> Float {
   }
   let rounded_int = float.round(rounded)
   int.to_float(rounded_int) *. step
+}
+
+fn render_event_card_inline(event: model.Event) -> Element(msg) {
+  let month_str = case event.date.month {
+    calendar.January -> "Jan"
+    calendar.February -> "Feb"
+    calendar.March -> "Mar"
+    calendar.April -> "Apr"
+    calendar.May -> "May"
+    calendar.June -> "Jun"
+    calendar.July -> "Jul"
+    calendar.August -> "Aug"
+    calendar.September -> "Sep"
+    calendar.October -> "Oct"
+    calendar.November -> "Nov"
+    calendar.December -> "Dec"
+  }
+
+  html.div(
+    [
+      attribute.class("event-card"),
+      attribute.styles([
+        #("background", "white"),
+        #("border", "2px solid " <> event_highlight_color),
+        #("border-radius", "8px"),
+        #("padding", "0.75rem"),
+        #("box-shadow", "0 2px 8px rgba(0,0,0,0.1)"),
+        #("font-size", "0.8rem"),
+      ]),
+    ],
+    [
+      html.h4(
+        [
+          attribute.styles([
+            #("margin", "0 0 0.25rem 0"),
+            #("font-size", "0.85rem"),
+            #("color", event_highlight_color),
+          ]),
+        ],
+        [html.text(event.display_name)],
+      ),
+      html.p(
+        [
+          attribute.styles([
+            #("margin", "0 0 0.25rem 0"),
+            #("font-size", "0.7rem"),
+            #("color", "#666"),
+          ]),
+        ],
+        [
+          html.text(
+            month_str
+            <> " "
+            <> int.to_string(event.date.day)
+            <> ", "
+            <> int.to_string(event.date.year),
+          ),
+        ],
+      ),
+      html.p(
+        [
+          attribute.styles([
+            #("margin", "0 0 0.25rem 0"),
+            #("font-size", "0.75rem"),
+            #("line-height", "1.3"),
+          ]),
+        ],
+        [html.text(event.description)],
+      ),
+      html.a(
+        [
+          attribute.href(event.wiki_link),
+          attribute.target("_blank"),
+          attribute.styles([
+            #("font-size", "0.7rem"),
+            #("color", event_highlight_color),
+            #("text-decoration", "none"),
+          ]),
+        ],
+        [html.text("Learn more →")],
+      ),
+    ],
+  )
 }
