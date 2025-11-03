@@ -1,5 +1,7 @@
 # Project artifacts
-*.json
+#   Generated climate data
+data/
+#   Built static site 
 dist/
 
 # Cache from requests_cache

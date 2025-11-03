@@ -20,6 +20,7 @@ simplifile = ">= 2.3.0 and < 3.0.0"
 temporary = ">= 1.0.0 and < 2.0.0"
 snag = ">= 1.2.0 and < 2.0.0"
 gleam_json = ">= 3.0.2 and < 4.0.0"
+taskle = ">= 2.0.0 and < 3.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

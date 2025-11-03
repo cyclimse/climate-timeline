@@ -1,7 +1,10 @@
+import gleam/io
+import gleam/list
 import gleam/string
 
 import lustre/element.{type Element}
 import simplifile
+import taskle
 import temporary
 
 import infographic
@@ -10,21 +13,77 @@ import page
 
 const root_dir = ".."
 
+const data_dir = root_dir <> "/data"
+
 const output_dir = root_dir <> "/dist"
 
 pub fn main() {
-  let city_name = "Berlin"
-  let samples = read_samples_for_city(city_name)
+  let assert Ok(climate_data_files) = simplifile.read_directory(data_dir)
+    as "listing data directory"
+
+  let cities =
+    climate_data_files
+    |> list.filter(fn(file) {
+      string.starts_with(file, "climate_data_")
+      && string.ends_with(file, ".json")
+    })
+    |> list.map(fn(file) {
+      string.drop_start(
+        string.drop_end(file, string.length(".json")),
+        string.length("climate_data_"),
+      )
+    })
+
+  let assert Ok(samples) =
+    taskle.parallel_map(
+      cities,
+      fn(city_name) {
+        let file_path =
+          data_dir
+          <> "/"
+          <> "climate_data_"
+          <> string.lowercase(city_name)
+          <> ".json"
+
+        io.println("Reading data for " <> city_name <> " from " <> file_path)
+
+        let assert Ok(samples) = model.read_samples_from_file(file_path)
+        #(city_name, samples)
+      },
+      5000,
+    )
 
   let assert Ok(Nil) = {
     use directory <- temporary.create(temporary.directory())
 
-    let index_page = infographic.from(samples)
-    must_write_page(
-      directory <> "/index.html",
-      "Climate Infographic - " <> city_name,
-      index_page,
-    )
+    // Generate pages for each city
+    let assert Ok(_) =
+      taskle.parallel_map(
+        samples,
+        fn(pair) {
+          let #(city_name, samples) = pair
+          let title = "Climate Data for " <> city_name
+
+          io.println("Generating page for " <> city_name)
+
+          // This is the slowest part:
+          let content = infographic.from(samples)
+
+          let path = directory <> "/" <> string.lowercase(city_name) <> ".html"
+          must_write_page(path, title, content)
+          Nil
+        },
+        5000,
+      )
+      as "generating pages"
+
+    list.each(samples, fn(pair) {
+      let #(city_name, samples) = pair
+      let title = "Climate Data for " <> city_name
+      let content = infographic.from(samples)
+      let path = directory <> "/" <> string.lowercase(city_name) <> ".html"
+      must_write_page(path, title, content)
+    })
 
     let assert Ok(_) = simplifile.delete(output_dir) as "cleaning dist"
     let assert Ok(_) = simplifile.create_directory(output_dir)
@@ -43,11 +102,4 @@ fn must_write_page(path: String, title: String, content: Element(msg)) -> Nil {
     |> element.to_document_string
     |> simplifile.write(to: path)
   Nil
-}
-
-fn read_samples_for_city(city_name: String) -> List(model.Sample) {
-  let file_name =
-    root_dir <> "/climate_data_" <> string.lowercase(city_name) <> ".json"
-  let assert Ok(data) = model.read_samples_from_file(file_name)
-  data
 }
