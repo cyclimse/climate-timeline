@@ -3,6 +3,7 @@ import gleam/float
 import gleam/int
 import gleam/list
 import gleam/option
+import gleam/result
 import gleam/string
 import gleam/time/calendar
 
@@ -12,53 +13,69 @@ import lustre/element/html
 
 import model
 
-pub fn from(samples: List(model.Sample)) -> Element(msg) {
+pub fn from(city_name: String, samples: List(model.Sample)) -> Element(msg) {
   let years =
     samples
     |> list.map(fn(sample) { sample.date.year })
     |> list.unique
     |> list.sort(int.compare)
+  let years_as_string =
+    list.first(years)
+    |> result.unwrap(0)
+    |> int.to_string
+    <> "-"
+    <> list.last(years)
+    |> result.unwrap(0)
+    |> int.to_string
 
   html.div(
     [
       attribute.styles([
         #("display", "flex"),
         #("flex-direction", "column"),
-        #("gap", "2rem"),
       ]),
     ],
     [
-      html.h1([], [html.text("Climate Infographic")]),
-      html.p([], [
-        html.text("Data spanning the years: "),
-        html.text(string.join(list.map(years, int.to_string), ", ")),
+      html.h2([], [
+        html.text("Climate Infographic for " <> string.capitalise(city_name)),
       ]),
-      html.div(
+      html.p(
         [
           attribute.styles([
-            #("margin-top", "2rem"),
+            #("font-size", "1rem"),
+            #("color", "#444"),
           ]),
         ],
         [
-          html.h2([], [html.text("Temperature Heatmap")]),
-          html.p(
-            [
-              attribute.styles([
-                #("font-size", "0.9rem"),
-                #("color", "#666"),
-                #("margin-bottom", "1rem"),
-              ]),
-            ],
-            [
-              html.text(
-                "Color intensity shows deviation from historical average.",
-              ),
-            ],
+          html.text(
+            "This infographic visualizes daily temperature data with respect to historical averages. Each square represents a day, colored by how the temperature deviated from the historical average for that date.",
           ),
-          render_temperature_legend(),
-          render_heatmap(samples),
+          html.text(
+            " The data covers the years "
+            <> years_as_string
+            <> ". All credits to Open-Meteo for the data.",
+          ),
         ],
       ),
+      html.div([], [
+        html.h3([], [html.text("Temperature Heatmap")]),
+        html.p(
+          [
+            attribute.styles([
+              #("font-size", "0.9rem"),
+              #("color", "#666"),
+              #("margin-bottom", "1rem"),
+            ]),
+          ],
+          [
+            html.text(
+              "Color intensity shows deviation from historical average.",
+            ),
+          ],
+        ),
+        render_temperature_legend(),
+        render_heatmap(samples),
+      ]),
     ],
   )
 }

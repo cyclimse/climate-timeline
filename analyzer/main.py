@@ -11,8 +11,7 @@ from retry_requests import retry
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_DIR = os.path.join(ROOT_DIR, "data")
-START_YEAR = 1979
-END_YEAR = 2023
+START_YEAR = 1980
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -147,7 +146,7 @@ class ClimateAnalyzer:
 def main():
     analyzer = ClimateAnalyzer()
     start_date = date(START_YEAR, 1, 1)
-    end_date = date(END_YEAR, 12, 31)
+    end_date = date.today()
 
     # Prepare output directory
     os.makedirs(OUTPUT_DIR, exist_ok=True)

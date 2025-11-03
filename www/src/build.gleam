@@ -45,7 +45,7 @@ pub fn main() {
           <> string.lowercase(city_name)
           <> ".json"
 
-        io.println("Reading data for " <> city_name <> " from " <> file_path)
+        io.println("Reading data for " <> string.capitalise(city_name) <> " from " <> file_path)
 
         let assert Ok(samples) = model.read_samples_from_file(file_path)
         #(city_name, samples)
@@ -62,12 +62,12 @@ pub fn main() {
         samples,
         fn(pair) {
           let #(city_name, samples) = pair
-          let title = "Climate Data for " <> city_name
+          let title = "Climate Data for " <> string.capitalise(city_name)
 
-          io.println("Generating page for " <> city_name)
+          io.println("Generating page for " <> string.capitalise(city_name))
 
           // This is the slowest part:
-          let content = infographic.from(samples)
+          let content = infographic.from(city_name, samples)
 
           let path = directory <> "/" <> string.lowercase(city_name) <> ".html"
           must_write_page(path, title, content)
@@ -76,14 +76,6 @@ pub fn main() {
         5000,
       )
       as "generating pages"
-
-    list.each(samples, fn(pair) {
-      let #(city_name, samples) = pair
-      let title = "Climate Data for " <> city_name
-      let content = infographic.from(samples)
-      let path = directory <> "/" <> string.lowercase(city_name) <> ".html"
-      must_write_page(path, title, content)
-    })
 
     let assert Ok(_) = simplifile.delete(output_dir) as "cleaning dist"
     let assert Ok(_) = simplifile.create_directory(output_dir)
