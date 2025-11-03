@@ -4,6 +4,7 @@ import gleam/int
 import gleam/list
 import gleam/option
 import gleam/string
+import gleam/time/calendar
 
 import lustre/attribute
 import lustre/element.{type Element}
@@ -212,29 +213,37 @@ fn render_heatmap(samples: List(model.Sample)) -> Element(msg) {
 }
 
 fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
-  // Calculate SVG dimensions based on samples
-  let num_days = list.length(samples)
   let square_size = 12
   let gap = 3
   let cell_size = square_size + gap
+  let month_label_width = 40
 
-  // Arrange in 53 columns (weeks) like GitHub
-  let cols = 53
-  let rows = { num_days + cols - 1 } / cols
-  // Ceiling division
-
-  let svg_width = cols * cell_size
-  let svg_height = rows * cell_size
-
-  // Group samples by color to minimize path elements
-  let grouped_by_color =
+  // Group samples by month
+  let samples_by_month =
     samples
-    |> list.index_map(fn(sample, index) { #(sample, index) })
-    |> list.group(fn(pair) {
-      let #(sample, _index) = pair
-      temperature_to_color(sample)
-    })
-    |> dict.to_list
+    |> list.group(fn(sample) { sample.date.month })
+
+  // Get all 12 months in order
+  let months = [
+    #(calendar.January, "Jan"),
+    #(calendar.February, "Feb"),
+    #(calendar.March, "Mar"),
+    #(calendar.April, "Apr"),
+    #(calendar.May, "May"),
+    #(calendar.June, "Jun"),
+    #(calendar.July, "Jul"),
+    #(calendar.August, "Aug"),
+    #(calendar.September, "Sep"),
+    #(calendar.October, "Oct"),
+    #(calendar.November, "Nov"),
+    #(calendar.December, "Dec"),
+  ]
+
+  // Calculate max days in any month (31) for consistent width
+  let max_days = 31
+  let svg_width = max_days * cell_size
+  let svg_height = 12 * cell_size
+  // 12 months
 
   html.div(
     [
@@ -254,57 +263,123 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
         ],
         [html.text(int.to_string(year))],
       ),
-      element.namespaced(
-        "http://www.w3.org/2000/svg",
-        "svg",
+      html.div(
         [
-          attribute.attribute("width", int.to_string(svg_width)),
-          attribute.attribute("height", int.to_string(svg_height)),
-          attribute.attribute(
-            "viewBox",
-            "0 0 "
-              <> int.to_string(svg_width)
-              <> " "
-              <> int.to_string(svg_height),
-          ),
           attribute.styles([
-            #("display", "block"),
-            #("overflow", "visible"),
+            #("display", "flex"),
+            #("gap", "0.5rem"),
+            #("align-items", "flex-start"),
           ]),
         ],
-        // Render one path per color
-        list.map(grouped_by_color, fn(group) {
-          let #(color, samples_with_index) = group
-          render_color_group_path(color, samples_with_index, square_size, gap)
-        }),
+        [
+          // Month labels column
+          html.div(
+            [
+              attribute.styles([
+                #("display", "flex"),
+                #("flex-direction", "column"),
+                #("gap", "0"),
+                #("padding-top", "0"),
+                #("width", int.to_string(month_label_width) <> "px"),
+              ]),
+            ],
+            list.map(months, fn(month_info) {
+              let #(_month, label) = month_info
+              html.div(
+                [
+                  attribute.styles([
+                    #("font-size", "0.75rem"),
+                    #("color", "#666"),
+                    #("text-align", "right"),
+                    #("padding-right", "0.5rem"),
+                    #("height", int.to_string(cell_size) <> "px"),
+                    #("display", "flex"),
+                    #("align-items", "center"),
+                    #("justify-content", "flex-end"),
+                  ]),
+                ],
+                [html.text(label)],
+              )
+            }),
+          ),
+          // SVG with all months
+          element.namespaced(
+            "http://www.w3.org/2000/svg",
+            "svg",
+            [
+              attribute.attribute("width", int.to_string(svg_width)),
+              attribute.attribute("height", int.to_string(svg_height)),
+              attribute.attribute(
+                "viewBox",
+                "0 0 "
+                  <> int.to_string(svg_width)
+                  <> " "
+                  <> int.to_string(svg_height),
+              ),
+              attribute.styles([
+                #("display", "block"),
+                #("overflow", "visible"),
+              ]),
+            ],
+            // Render each month's data
+            list.index_map(months, fn(month_info, month_index) {
+              let #(month, _label) = month_info
+              let month_samples =
+                dict.get(samples_by_month, month)
+                |> option.from_result
+                |> option.unwrap([])
+
+              render_month_paths(month_samples, month_index, square_size, gap)
+            })
+              |> list.flatten,
+          ),
+        ],
       ),
     ],
   )
 }
 
-fn render_color_group_path(
+fn render_month_paths(
+  samples: List(model.Sample),
+  month_index: Int,
+  square_size: Int,
+  gap: Int,
+) -> List(Element(msg)) {
+  // Group samples by color
+  let grouped_by_color =
+    samples
+    |> list.sort(fn(a, b) { int.compare(a.date.day, b.date.day) })
+    |> list.index_map(fn(sample, _idx) { sample })
+    |> list.group(fn(sample) { temperature_to_color(sample) })
+    |> dict.to_list
+
+  // Render one path per color for this month
+  list.map(grouped_by_color, fn(group) {
+    let #(color, month_samples) = group
+    render_month_color_path(color, month_samples, month_index, square_size, gap)
+  })
+}
+
+fn render_month_color_path(
   color: String,
-  samples_with_index: List(#(model.Sample, Int)),
+  samples: List(model.Sample),
+  month_index: Int,
   square_size: Int,
   gap: Int,
 ) -> Element(msg) {
   let cell_size = square_size + gap
-  let cols = 53
+  let y_offset = month_index * cell_size
   let radius = 2
 
-  // Build path data for all rectangles of this color
+  // Build path data for all rectangles of this color in this month
   let path_data =
-    samples_with_index
-    |> list.map(fn(pair) {
-      let #(_sample, index) = pair
-      let col = index % cols
-      let row = index / cols
-      let x = col * cell_size
-      let y = row * cell_size
+    samples
+    |> list.map(fn(sample) {
+      let day = sample.date.day
+      let x = { day - 1 } * cell_size
+      let y = y_offset
 
       // Create a rounded rectangle path for this cell
-      // M x,y+r means: move to (x, y+radius)
-      // Then draw the rounded rectangle using arcs and lines
       let x_str = int.to_string(x)
       let y_str = int.to_string(y)
       let x_r_str = int.to_string(x + radius)
