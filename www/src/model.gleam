@@ -1,6 +1,8 @@
+import gleam/dict
 import gleam/dynamic/decode
 import gleam/int
 import gleam/json
+import gleam/list
 import gleam/option.{type Option}
 import gleam/result
 import gleam/string
@@ -56,6 +58,22 @@ pub fn read_samples_from_file(file_path: String) -> Result(List(Sample)) {
     }),
   )
   Ok(samples)
+}
+
+pub fn attach_events(samples: List(Sample), events: List(Event)) -> List(Sample) {
+  let event_dict =
+    events
+    |> list.fold(dict.new(), fn(acc, event) {
+      dict.insert(acc, event.date, event)
+    })
+
+  samples
+  |> list.map(fn(sample) {
+    let event =
+      dict.get(event_dict, sample.date)
+      |> option.from_result
+    Sample(..sample, event: event)
+  })
 }
 
 pub type Event {

@@ -59,7 +59,9 @@ pub fn main() {
         )
 
         let assert Ok(samples) = model.read_samples_from_file(file_path)
-        #(city_name, samples)
+        let samples_with_events = model.attach_events(samples, events)
+
+        #(city_name, samples_with_events)
       },
       5000,
     )
@@ -83,7 +85,7 @@ pub fn main() {
           io.println("Generating page for " <> string.capitalise(city_name))
 
           // This is the slowest part:
-          let content = infographic.from(events:, samples:)
+          let content = infographic.from(samples)
 
           let path = directory <> "/" <> city_name_lower <> ".html"
           must_write_page(path, title, city_names, city_name_lower, content)
