@@ -7,6 +7,7 @@ import simplifile
 import taskle
 import temporary
 
+import index
 import infographic
 import model
 import page
@@ -58,7 +59,9 @@ pub fn main() {
       5000,
     )
 
-  let city_names = list.map(cities, string.lowercase)
+  let city_names =
+    list.map(cities, string.lowercase)
+    |> list.sort(string.compare)
 
   let assert Ok(Nil) = {
     use directory <- temporary.create(temporary.directory())
@@ -85,6 +88,15 @@ pub fn main() {
       )
       as "generating pages"
 
+    // Generate index page
+    io.println("Generating index page")
+    let index_content = index.from(city_names)
+    must_write_index_page(
+      directory <> "/index.html",
+      "Climate Infographics",
+      index_content,
+    )
+
     let assert Ok(_) = simplifile.delete(output_dir) as "cleaning dist"
     let assert Ok(_) = simplifile.create_directory(output_dir)
       as "creating dist"
@@ -105,6 +117,19 @@ fn must_write_page(
   let assert Ok(Nil) =
     content
     |> page.from(title, cities, current_city, _)
+    |> element.to_document_string
+    |> simplifile.write(to: path)
+  Nil
+}
+
+fn must_write_index_page(
+  path: String,
+  title: String,
+  content: Element(msg),
+) -> Nil {
+  let assert Ok(Nil) =
+    content
+    |> page.from_simple(title, _)
     |> element.to_document_string
     |> simplifile.write(to: path)
   Nil

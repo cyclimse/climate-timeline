@@ -37,6 +37,43 @@ pub fn from(
   )
 }
 
+pub fn from_simple(title: String, inner: Element(msg)) -> Element(msg) {
+  html.html(
+    [
+      attribute.styles([
+        #("--hue", "var(--hue-violet)"),
+        #("font-size", "var(--font-size-4)"),
+        #("line-height", "var(--line-height-2)"),
+      ]),
+    ],
+    [
+      head(title),
+      html.body(
+        [
+          attribute.styles([
+            #("max-width", "50rem"),
+            #("margin", "3rem auto"),
+            #("padding", "0 1rem"),
+          ]),
+        ],
+        [inner],
+      ),
+    ],
+  )
+}
+
+// TODO: Host these locally
+fn flygja_css(subpackage: String) -> Element(msg) {
+  html.link([
+    attribute.rel("stylesheet"),
+    attribute.href(
+      "https://cdn.jsdelivr.net/npm/@fylgja/"
+      <> subpackage
+      <> "/index.min.css",
+    ),
+  ])
+}
+
 fn head(title: String) -> Element(msg) {
   html.head([], [
     html.meta([attribute.charset("utf-8")]),
@@ -44,23 +81,10 @@ fn head(title: String) -> Element(msg) {
       attribute.name("viewport"),
       attribute.content("width=device-width, initial-scale=1"),
     ]),
-    // TODO: host these locally
-    html.link([
-      attribute.rel("stylesheet"),
-      attribute.href("https://cdn.jsdelivr.net/npm/@fylgja/base/index.min.css"),
-    ]),
-    html.link([
-      attribute.rel("stylesheet"),
-      attribute.href(
-        "https://cdn.jsdelivr.net/npm/@fylgja/tokens/css/index.min.css",
-      ),
-    ]),
-    html.link([
-      attribute.rel("stylesheet"),
-      attribute.href(
-        "https://cdn.jsdelivr.net/npm/@fylgja/utilities/index.min.css",
-      ),
-    ]),
+    flygja_css("base"),
+    flygja_css("tokens/css"),
+    flygja_css("utilities"),
+    flygja_css("card"),
     element.element("style", [], [
       element.text(
         "@media (max-width: 500px) { .month-label { display: none !important; } .month-grid { grid-template-columns: 1fr !important; } }",
@@ -76,7 +100,7 @@ fn navbar(cities: List(String), current_city: String) -> Element(msg) {
       attribute.class("page-header"),
       attribute.styles([
         #("margin-bottom", "2rem"),
-      ])
+      ]),
     ],
     [
       html.div(
