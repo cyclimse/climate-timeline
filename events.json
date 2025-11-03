@@ -14,11 +14,25 @@
         "wiki_link": "https://en.wikipedia.org/wiki/Kyoto_Protocol"
     },
     {
+        "id": "unfccc_1992",
+        "display_name": "United Nations Framework Convention on Climate Change (UNFCCC)",
+        "date": "1992-06-03",
+        "description": "The UNFCCC was adopted at the Earth Summit in Rio de Janeiro, establishing the international framework for intergovernmental efforts to tackle climate change. It set the foundation for future climate agreements including the Kyoto Protocol and Paris Agreement.",
+        "wiki_link": "https://en.wikipedia.org/wiki/United_Nations_Framework_Convention_on_Climate_Change"
+    },
+    {
         "id": "ipcc_establishment_1988",
         "display_name": "Establishment of the Intergovernmental Panel on Climate Change (IPCC)",
         "date": "1988-11-01",
         "description": "The IPCC was established by the United Nations to provide scientific assessments on climate change, its impacts, and potential future risks, as well as to propose adaptation and mitigation strategies.",
         "wiki_link": "https://en.wikipedia.org/wiki/Intergovernmental_Panel_on_Climate_Change"
+    },
+    {
+        "id": "arrhenius_1896",
+        "display_name": "Svante Arrhenius Quantifies CO2 Climate Effects",
+        "date": "1896-04-01",
+        "description": "Swedish scientist Svante Arrhenius published the first quantitative calculation of how changes in atmospheric carbon dioxide levels could affect Earth's temperature through the greenhouse effect. This laid the scientific groundwork for understanding anthropogenic climate change.",
+        "wiki_link": "https://en.wikipedia.org/wiki/Svante_Arrhenius"
     },
     {
         "id": "earth_day_1970",
@@ -33,6 +47,27 @@
         "date": "1987-09-16",
         "description": "The Montreal Protocol on Substances that Deplete the Ozone Layer was adopted to phase out the production and consumption of ozone-depleting substances.",
         "wiki_link": "https://en.wikipedia.org/wiki/Montreal_Protocol"
+    },
+    {
+        "id": "cop21_paris_2015",
+        "display_name": "COP21 Paris Climate Summit",
+        "date": "2015-12-12",
+        "description": "The 21st Conference of the Parties concluded in Paris with 195 nations agreeing to a landmark accord committing all countries to reduce carbon emissions for the first time in history. This summit led to the Paris Agreement being opened for signature in 2016.",
+        "wiki_link": "https://en.wikipedia.org/wiki/2015_United_Nations_Climate_Change_Conference"
+    },
+    {
+        "id": "keeling_curve_1958",
+        "display_name": "Beginning of the Keeling Curve Measurements",
+        "date": "1958-03-01",
+        "description": "Charles David Keeling began continuous measurements of atmospheric carbon dioxide at Mauna Loa Observatory in Hawaii. The resulting 'Keeling Curve' provided the first clear evidence of rising CO2 levels and became one of the most important scientific datasets for understanding climate change.",
+        "wiki_link": "https://en.wikipedia.org/wiki/Keeling_Curve"
+    },
+    {
+        "id": "kyoto_entry_force_2005",
+        "display_name": "Kyoto Protocol Enters into Force",
+        "date": "2005-02-16",
+        "description": "The Kyoto Protocol officially entered into force after Russia's ratification brought the treaty above the required threshold. This marked the first time legally binding emission reduction targets were in effect for industrialized nations.",
+        "wiki_link": "https://en.wikipedia.org/wiki/Kyoto_Protocol"
     },
     {
         "id": "us_withdrawal_paris_2025",
