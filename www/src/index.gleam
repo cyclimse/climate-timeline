@@ -31,11 +31,26 @@ pub fn from(cities: List(String)) -> Element(msg) {
             attribute.styles([
               #("font-size", "1.2rem"),
               #("color", "#666"),
+              #("margin-bottom", "0.5rem"),
             ]),
           ],
           [
             html.text(
               "Explore daily temperature data visualizations for major European cities.",
+            ),
+          ],
+        ),
+        html.p(
+          [
+            attribute.styles([
+              #("font-size", "0.95rem"),
+              #("color", "#888"),
+              #("margin-top", "0.5rem"),
+            ]),
+          ],
+          [
+            html.text(
+              "Data provided by Open-Meteo. Visualizations show daily temperature deviations from historical averages.",
             ),
           ],
         ),
@@ -50,24 +65,6 @@ pub fn from(cities: List(String)) -> Element(msg) {
           ]),
         ],
         list.map(cities, fn(city) { city_card(city) }),
-      ),
-      html.footer(
-        [
-          attribute.styles([
-            #("margin-top", "3rem"),
-            #("padding-top", "2rem"),
-            #("border-top", "1px solid #ddd"),
-            #("font-size", "0.9rem"),
-            #("color", "#888"),
-          ]),
-        ],
-        [
-          html.p([], [
-            html.text(
-              "Data provided by Open-Meteo. Visualizations show daily temperature deviations from historical averages.",
-            ),
-          ]),
-        ],
       ),
     ],
   )

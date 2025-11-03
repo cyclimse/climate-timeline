@@ -5,6 +5,8 @@ import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 
+import color
+
 pub fn from(
   title: String,
   cities: List(String),
@@ -31,6 +33,7 @@ pub fn from(
         [
           navbar(cities, current_city),
           inner,
+          footer(),
         ],
       ),
     ],
@@ -56,7 +59,7 @@ pub fn from_simple(title: String, inner: Element(msg)) -> Element(msg) {
             #("padding", "0 1rem"),
           ]),
         ],
-        [inner],
+        [inner, footer()],
       ),
     ],
   )
@@ -171,6 +174,41 @@ fn navbar(cities: List(String), current_city: String) -> Element(msg) {
             ],
           ),
         ],
+      ),
+    ],
+  )
+}
+
+fn footer() -> Element(msg) {
+  html.footer(
+    [
+      attribute.styles([
+        #("padding", "2rem"),
+        #("margin-top", "4rem"),
+        #("text-align", "center"),
+        #("border-top", "2px solid " <> color.highlight),
+        #("color", "#666"),
+      ]),
+    ],
+    [
+      html.p(
+        [
+          attribute.styles([
+            #("margin", "0"),
+            #("font-size", "1rem"),
+          ]),
+        ],
+        [html.text("Climate Data Visualization")],
+      ),
+      html.p(
+        [
+          attribute.styles([
+            #("margin", "0.5rem 0 0 0"),
+            #("font-size", "0.875rem"),
+            #("opacity", "0.8"),
+          ]),
+        ],
+        [html.text("Made with ❤️ for climate awareness")],
       ),
     ],
   )

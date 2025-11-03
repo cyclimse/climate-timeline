@@ -11,9 +11,8 @@ import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 
+import color
 import model
-
-const event_highlight_color = "#0000FF"
 
 pub fn from(samples: List(model.Sample)) -> Element(msg) {
   let years =
@@ -551,7 +550,7 @@ fn render_event_highlight(
     [
       attribute.attribute("d", path_data),
       attribute.attribute("fill", "none"),
-      attribute.attribute("stroke", event_highlight_color),
+      attribute.attribute("stroke", color.highlight),
       attribute.attribute("stroke-width", int.to_string(stroke_width)),
       attribute.attribute("class", "event-highlight"),
       attribute.styles([#("pointer-events", "none")]),
@@ -747,7 +746,7 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
       attribute.class("event-card"),
       attribute.styles([
         #("background", "white"),
-        #("border", "2px solid " <> event_highlight_color),
+        #("border", "2px solid " <> color.highlight),
         #("border-radius", "8px"),
         #("padding", "0.75rem"),
         #("box-shadow", "0 2px 8px rgba(0,0,0,0.1)"),
@@ -760,7 +759,7 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
           attribute.styles([
             #("margin", "0 0 0.25rem 0"),
             #("font-size", "0.85rem"),
-            #("color", event_highlight_color),
+            #("color", color.highlight),
           ]),
         ],
         [html.text(event.display_name)],
@@ -799,7 +798,7 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
           attribute.target("_blank"),
           attribute.styles([
             #("font-size", "0.7rem"),
-            #("color", event_highlight_color),
+            #("color", color.highlight),
             #("text-decoration", "none"),
           ]),
         ],
