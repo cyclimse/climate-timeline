@@ -34,7 +34,7 @@ Then run the analyzer and build the site again, it should pick up the new city a
 
 Events are stored in a json file at `events.json`. They have the following format:
 
-```json
+```jsonc
 [
   {
     "id": "some_event_2020", // Used as a slug, should be unique
