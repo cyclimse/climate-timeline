@@ -24,7 +24,7 @@ pub fn from(cities: List(String)) -> Element(msg) {
               #("margin-bottom", "0.5rem"),
             ]),
           ],
-          [html.text("Climate Infographics")],
+          [html.text("Climate Timeline")],
         ),
         html.p(
           [

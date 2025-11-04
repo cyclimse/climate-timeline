@@ -100,7 +100,7 @@ pub fn main() {
     let index_content = index.from(city_names)
     must_write_index_page(
       directory <> "/index.html",
-      "Climate Infographics",
+      "Climate Timeline",
       index_content,
     )
 
