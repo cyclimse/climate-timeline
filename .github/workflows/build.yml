@@ -1,0 +1,62 @@
+name: Build the SSG site
+
+on:
+  workflow_call:
+    outputs:
+      artifact-name:
+        description: "Name of the build artifact"
+        value: ${{ jobs.build.outputs.artifact-name }}
+
+env:
+  OTP_VERSION: "28"
+  GLEAM_VERSION: "1.13.0"
+  REBAR3_VERSION: "3"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.upload.outputs.artifact-name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          working-directory: ./analyzer
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Cache API data
+        uses: actions/cache@v4
+        with:
+          path: analyzer/.cache.sqlite
+          # This is a trick to get a "rolling" cache that updates on every run.
+          # See: github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          key: weather-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            weather-${{ runner.os }}
+
+      - name: Run Analyzer
+        run: uv run --directory analyzer main.py
+
+      - name: Set up Gleam Environment
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          gleam-version: ${{ env.GLEAM_VERSION }}
+          rebar3-version: ${{ env.REBAR3_VERSION }}
+
+      - name: Build the site
+        run: gleam run -m build
+        working-directory: ./www
+
+      - name: Upload artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 1

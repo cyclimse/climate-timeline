@@ -23,8 +23,15 @@ class ClimateAnalyzer:
 
     def __init__(self):
         # Setup the Open-Meteo API client with cache and retry on error
-        cache_session = requests_cache.CachedSession(".cache", expire_after=-1)
-        retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+        cache_session = requests_cache.CachedSession(
+            ".cache", expire_after=-1
+        )  # Never expire
+        retry_session = retry(
+            cache_session,
+            retries=10,
+            backoff_factor=3,
+            status_to_retry=(500, 502, 504, 429),
+        )
 
         self.session = retry_session
         self.openmeteo_client = openmeteo_requests.Client(session=retry_session)

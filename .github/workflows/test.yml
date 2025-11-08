@@ -1,10 +1,15 @@
-name: test
+name: Run Gleam Tests
 
 on:
   push:
     branches:
       - main
   pull_request:
+
+env:
+  OTP_VERSION: "28"
+  GLEAM_VERSION: "1.13.0"
+  REBAR3_VERSION: "3"
 
 jobs:
   test:
@@ -15,12 +20,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: erlef/setup-beam@v1
+
+      - name: Set up Gleam Environment
+        uses: erlef/setup-beam@v1
         with:
-          otp-version: "28"
-          gleam-version: "1.13.0"
-          rebar3-version: "3"
-          # elixir-version: "1"
+          otp-version: ${{ env.OTP_VERSION }}
+          gleam-version: ${{ env.GLEAM_VERSION }}
+          rebar3-version: ${{ env.REBAR3_VERSION }}
+
       - run: gleam deps download
-      - run: gleam test
-      - run: gleam format --check src test
+
+      - name: Run Tests
+        run: gleam test
+
+      - name: Check Formatting
+        run: gleam format --check src test

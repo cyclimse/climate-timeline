@@ -1,5 +1,6 @@
 import gleam/io
 import gleam/list
+import gleam/result
 import gleam/string
 
 import lustre/element.{type Element}
@@ -104,7 +105,17 @@ pub fn main() {
       index_content,
     )
 
-    let assert Ok(_) = simplifile.delete(output_dir) as "cleaning dist"
+    let assert Ok(_) = {
+      simplifile.delete(output_dir)
+      |> result.try_recover(fn(err) {
+        case err {
+          // Ignore error if directory does not exist
+          simplifile.Enoent -> Ok(Nil)
+          _ -> Error(err)
+        }
+      })
+    }
+      as "cleaning dist"
     let assert Ok(_) = simplifile.create_directory(output_dir)
       as "creating dist"
     let assert Ok(_) = simplifile.copy_directory(directory, output_dir)
