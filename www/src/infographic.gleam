@@ -261,20 +261,22 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
     |> list.group(fn(event) { event.date.month })
 
   // Get all 12 months in order
-  let months = [
-    #(calendar.January, "Jan"),
-    #(calendar.February, "Feb"),
-    #(calendar.March, "Mar"),
-    #(calendar.April, "Apr"),
-    #(calendar.May, "May"),
-    #(calendar.June, "Jun"),
-    #(calendar.July, "Jul"),
-    #(calendar.August, "Aug"),
-    #(calendar.September, "Sep"),
-    #(calendar.October, "Oct"),
-    #(calendar.November, "Nov"),
-    #(calendar.December, "Dec"),
-  ]
+  let months =
+    [
+      calendar.January,
+      calendar.February,
+      calendar.March,
+      calendar.April,
+      calendar.May,
+      calendar.June,
+      calendar.July,
+      calendar.August,
+      calendar.September,
+      calendar.October,
+      calendar.November,
+      calendar.December,
+    ]
+    |> list.map(fn(month) { #(month, month_short_name(month)) })
 
   // Calculate max days in any month (31) for consistent width
   let max_days = 31
@@ -307,118 +309,161 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
           ]),
         ],
         [
-          // CSS Grid container with 2 columns: labels and SVG (full width)
+          // Container for month rows (stacked vertically)
           html.div(
             [
               attribute.class("month-grid"),
               attribute.styles([
-                #("display", "grid"),
-                #("grid-template-columns", "2.5rem 1fr"),
+                #("display", "flex"),
+                #("flex-direction", "column"),
                 #("gap", "0"),
                 #("width", "100%"),
               ]),
             ],
-            // Month labels and SVG rows
-            list.index_map(months, fn(month_info, _month_index) {
+            // Each month is a single row with 4 columns
+            list.map(months, fn(month_info) {
               let #(month, label) = month_info
               let month_samples =
                 dict.get(samples_by_month, month)
                 |> option.from_result
                 |> option.unwrap([])
 
-              [
-                // Month label (left column)
-                html.div(
-                  [
-                    attribute.class("month-label"),
-                    attribute.styles([
-                      #("font-size", "0.75rem"),
-                      #("color", "#666"),
-                      #("text-align", "right"),
-                      #("padding-right", "0.5rem"),
-                      #("display", "flex"),
-                      #("align-items", "center"),
-                      #("justify-content", "flex-end"),
-                    ]),
-                  ],
-                  [html.text(label)],
-                ),
-                // SVG for this month's row (right column)
-                element.namespaced(
-                  "http://www.w3.org/2000/svg",
-                  "svg",
-                  [
-                    attribute.attribute(
-                      "viewBox",
-                      "0 0 "
-                        <> int.to_string(svg_width)
-                        <> " "
-                        <> int.to_string(cell_size),
-                    ),
-                    attribute.styles([
-                      #("display", "block"),
-                      #("width", "100%"),
-                      #("height", "100%"),
-                      #("overflow", "visible"),
-                    ]),
-                  ],
-                  list.flatten([
-                    render_month_paths_single_row(
-                      month_samples,
-                      0,
-                      square_size,
-                      gap,
-                    ),
-                    render_month_event_highlights(
-                      month_samples,
-                      0,
-                      square_size,
-                      gap,
-                    ),
-                    render_max_temp_highlight(
-                      month_samples,
-                      0,
-                      square_size,
-                      gap,
-                    ),
-                  ]),
-                ),
-              ]
-            })
-              |> list.flatten,
-          ),
-          // Event cards positioned absolutely on the right
-          html.div(
-            [
-              attribute.class("year-events"),
-              attribute.styles([
-                #("position", "absolute"),
-                #("left", "calc(100% + 1rem)"),
-                #("top", "0"),
-                #("width", "280px"),
-              ]),
-            ],
-            list.index_map(months, fn(month_info, month_idx) {
-              let #(month, _label) = month_info
               let month_events =
                 dict.get(events_by_month, month)
                 |> option.from_result
                 |> option.unwrap([])
 
-              case list.first(month_events) {
-                Ok(event) ->
+              let max_temp_sample =
+                list.find(month_samples, fn(sample) { sample.is_maximum })
+
+              // Each month row is a grid with 4 columns
+              html.div(
+                [
+                  attribute.class("month-row"),
+                  attribute.styles([
+                    #("display", "grid"),
+                    #("grid-template-columns", "0 2.5rem 1fr 0"),
+                    #("gap", "0"),
+                    #("width", "100%"),
+                  ]),
+                ],
+                [
+                  // First column (left) - temp indicators
                   html.div(
                     [
+                      attribute.class("temp-indicator-col"),
                       attribute.styles([
-                        #("position", "absolute"),
-                        #("top", int.to_string(month_idx * 15) <> "px"),
-                        #("width", "100%"),
+                        #("position", "relative"),
+                        #("overflow", "visible"),
                       ]),
                     ],
-                    [render_event_card_inline(event)],
-                  )
-                Error(_) -> html.div([], [])
-              }
+                    case max_temp_sample {
+                      Ok(sample) -> [
+                        html.div(
+                          [
+                            attribute.styles([
+                              #("position", "absolute"),
+                              #("right", "0"),
+                              #("top", "50%"),
+                              #("transform", "translateY(-50%)"),
+                              #("display", "flex"),
+                              #("align-items", "center"),
+                              #("justify-content", "flex-end"),
+                            ]),
+                          ],
+                          [render_max_temp_indicator_left(sample)],
+                        ),
+                      ]
+                      Error(_) -> []
+                    },
+                  ),
+                  // Month label (second column)
+                  html.div(
+                    [
+                      attribute.class("month-label"),
+                      attribute.styles([
+                        #("font-size", "0.75rem"),
+                        #("color", "#666"),
+                        #("text-align", "right"),
+                        #("padding-right", "0.5rem"),
+                        #("display", "flex"),
+                        #("align-items", "center"),
+                        #("justify-content", "flex-end"),
+                      ]),
+                    ],
+                    [html.text(label)],
+                  ),
+                  // SVG for this month's row (third column)
+                  element.namespaced(
+                    "http://www.w3.org/2000/svg",
+                    "svg",
+                    [
+                      attribute.attribute(
+                        "viewBox",
+                        "0 0 "
+                          <> int.to_string(svg_width)
+                          <> " "
+                          <> int.to_string(cell_size),
+                      ),
+                      attribute.styles([
+                        #("display", "block"),
+                        #("width", "100%"),
+                        #("height", "100%"),
+                        #("overflow", "visible"),
+                      ]),
+                    ],
+                    list.flatten([
+                      render_month_paths_single_row(
+                        month_samples,
+                        0,
+                        square_size,
+                        gap,
+                      ),
+                      render_month_event_highlights(
+                        month_samples,
+                        0,
+                        square_size,
+                        gap,
+                      ),
+                      render_max_temp_highlight(
+                        month_samples,
+                        0,
+                        square_size,
+                        gap,
+                      ),
+                    ]),
+                  ),
+                  // Fourth column (right) - event cards
+                  html.div(
+                    [
+                      attribute.class("event-card-col"),
+                      attribute.styles([
+                        #("position", "relative"),
+                        #("overflow", "visible"),
+                      ]),
+                    ],
+                    case list.first(month_events) {
+                      Ok(event) -> [
+                        html.div(
+                          [
+                            attribute.styles([
+                              #("position", "absolute"),
+                              #("left", "1rem"),
+                              #("top", "0"),
+                              #("display", "flex"),
+                              #("align-items", "center"),
+                              #("min-height", int.to_string(cell_size) <> "px"),
+                              #("width", "280px"),
+                            ]),
+                          ],
+                          [render_event_card_inline(event)],
+                        ),
+                      ]
+                      Error(_) -> []
+                    },
+                  ),
+                ],
+              )
             }),
           ),
         ],
@@ -762,8 +807,101 @@ fn quantize_value(value: Float, step: Float) -> Float {
   int.to_float(rounded_int) *. step
 }
 
-fn render_event_card_inline(event: model.Event) -> Element(msg) {
-  let month_str = case event.date.month {
+fn render_max_temp_indicator_left(sample: model.Sample) -> Element(msg) {
+  html.div(
+    [
+      attribute.class("max-temp-indicator"),
+      attribute.styles([
+        #("display", "flex"),
+        #("align-items", "center"),
+        #("gap", "0.5rem"),
+        #("justify-content", "flex-end"),
+      ]),
+    ],
+    [
+      // Temperature info box
+      html.div(
+        [
+          attribute.styles([
+            #("background", "white"),
+            #("border", "2px solid " <> color.max_temp_highlight),
+            #("border-radius", "6px"),
+            #("padding", "0.4rem 0.6rem"),
+            #("box-shadow", "0 2px 4px rgba(0,0,0,0.1)"),
+            #("font-size", "0.75rem"),
+            #("white-space", "nowrap"),
+          ]),
+        ],
+        [
+          html.div(
+            [
+              attribute.styles([
+                #("font-weight", "bold"),
+                #("color", color.max_temp_highlight),
+                #("font-size", "0.85rem"),
+              ]),
+            ],
+            [
+              html.text(
+                float.to_precision(sample.max_temperature_celsius, 1)
+                |> float.to_string
+                <> "°C",
+              ),
+            ],
+          ),
+          html.div(
+            [
+              attribute.styles([
+                #("color", "#666"),
+                #("font-size", "0.65rem"),
+                #("margin-top", "0.1rem"),
+              ]),
+            ],
+            [
+              html.text(
+                "Record high "
+                <> month_short_name(sample.date.month)
+                <> " "
+                <> int.to_string(sample.date.day),
+              ),
+            ],
+          ),
+        ],
+      ),
+      // Arrow pointing to the right (toward the heatmap)
+      element.namespaced(
+        "http://www.w3.org/2000/svg",
+        "svg",
+        [
+          attribute.attribute("width", "40"),
+          attribute.attribute("height", "20"),
+          attribute.attribute("viewBox", "0 0 40 20"),
+          attribute.styles([
+            #("flex-shrink", "0"),
+          ]),
+        ],
+        [
+          element.namespaced(
+            "http://www.w3.org/2000/svg",
+            "path",
+            [
+              attribute.attribute("d", "M0,10 L35,10 L25,5 M35,10 L25,15"),
+              attribute.attribute("stroke", color.max_temp_highlight),
+              attribute.attribute("stroke-width", "2"),
+              attribute.attribute("fill", "none"),
+              attribute.attribute("stroke-linecap", "round"),
+              attribute.attribute("stroke-linejoin", "round"),
+            ],
+            [],
+          ),
+        ],
+      ),
+    ],
+  )
+}
+
+fn month_short_name(month: calendar.Month) -> String {
+  let month_str = case month {
     calendar.January -> "Jan"
     calendar.February -> "Feb"
     calendar.March -> "Mar"
@@ -777,7 +915,10 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
     calendar.November -> "Nov"
     calendar.December -> "Dec"
   }
+  month_str
+}
 
+fn render_event_card_inline(event: model.Event) -> Element(msg) {
   html.div(
     [
       attribute.class("event-card"),
@@ -811,7 +952,7 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
         ],
         [
           html.text(
-            month_str
+            month_short_name(event.date.month)
             <> " "
             <> int.to_string(event.date.day)
             <> ", "

@@ -90,7 +90,7 @@ fn head(title: String) -> Element(msg) {
     flygja_css("card"),
     element.element("style", [], [
       element.text(
-        "@media (max-width: 500px) { .month-label { display: none !important; } .month-grid { grid-template-columns: 1fr !important; } } @media (max-width: 1200px) { .year-events { display: none !important; } } .event-card:hover { transform: scale(1.02); transition: transform 0.2s ease; box-shadow: 0 4px 12px rgba(255,0,255,0.2); }",
+        "@media (max-width: 500px) { .month-label { display: none !important; } .month-grid { max-width: 100% !important; } .month-row { display: block !important; width: 100% !important; } .month-row > *:not(svg) { display: none !important; } .month-row svg { width: 100% !important; height: auto !important; display: block !important; max-width: 100% !important; } } @media (max-width: 1200px) { .month-row { grid-template-columns: 2.5rem 1fr !important; } .temp-indicator-col, .event-card-col { display: none !important; } } .event-card:hover { transform: scale(1.02); transition: transform 0.2s ease; box-shadow: 0 4px 12px rgba(255,0,255,0.2); }",
       ),
     ]),
     html.title([], title),

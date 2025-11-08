@@ -49,13 +49,6 @@
         "wiki_link": "https://en.wikipedia.org/wiki/Montreal_Protocol"
     },
     {
-        "id": "cop21_paris_2015",
-        "display_name": "COP21 Paris Climate Summit",
-        "date": "2015-12-12",
-        "description": "The 21st Conference of the Parties concluded in Paris with 195 nations agreeing to a landmark accord committing all countries to reduce carbon emissions for the first time in history. This summit led to the Paris Agreement being opened for signature in 2016.",
-        "wiki_link": "https://en.wikipedia.org/wiki/2015_United_Nations_Climate_Change_Conference"
-    },
-    {
         "id": "keeling_curve_1958",
         "display_name": "Beginning of the Keeling Curve Measurements",
         "date": "1958-03-01",
