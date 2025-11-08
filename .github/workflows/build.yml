@@ -3,6 +3,11 @@ name: build
 on:
   pull_request:
 
+env:
+  OTP_VERSION: "28"
+  GLEAM_VERSION: "1.13.0"
+  REBAR3_VERSION: "3"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,3 +35,14 @@ jobs:
 
       - name: Run Analyzer
         run: uv run --directory analyzer main.py
+
+      - name: Set up Gleam Environment
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          gleam-version: ${{ env.GLEAM_VERSION }}
+          rebar3-version: ${{ env.REBAR3_VERSION }}
+
+      - name: Build the site
+        run: gleam run -m build
+        working-directory: ./www
