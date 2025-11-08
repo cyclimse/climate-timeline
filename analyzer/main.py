@@ -49,7 +49,10 @@ class ClimateAnalyzer:
             "longitude": longitude,
             "start_date": start_date.isoformat(),
             "end_date": end_date.isoformat(),
-            "daily": "temperature_2m_mean",
+            "daily": [
+                "temperature_2m_mean",
+                "temperature_2m_max",
+            ],
             "timezone": "auto",
         }
         responses = self.openmeteo_client.weather_api(url, params=params)
@@ -60,6 +63,7 @@ class ClimateAnalyzer:
         # Process daily data. The order of variables needs to be the same as requested.
         daily = response.Daily()
         daily_temperature_2m = daily.Variables(0).ValuesAsNumpy()
+        daily_temperature_2m_max = daily.Variables(1).ValuesAsNumpy()
 
         # Get days as datetime objects
         days = [
@@ -71,6 +75,7 @@ class ClimateAnalyzer:
             {
                 "date": days,
                 "temperature_celsius": daily_temperature_2m,
+                "max_temperature_celsius": daily_temperature_2m_max,
             }
         )
 
@@ -117,6 +122,15 @@ class ClimateAnalyzer:
 
         return df
 
+    def __identify_max_temp_day(self, df: pl.DataFrame) -> pl.DataFrame:
+        max_temp = df["max_temperature_celsius"].max()
+
+        df = df.with_columns(
+            (pl.col("max_temperature_celsius") == max_temp).alias("is_maximum")
+        )
+
+        return df
+
     def __geocode_city(self, city_name: str) -> tuple[float, float]:
         url = "https://geocoding-api.open-meteo.com/v1/search"
         params = {"name": city_name, "count": 1}
@@ -146,8 +160,9 @@ class ClimateAnalyzer:
 
         df = self.__process_weather_data(start_date, response)
         df_with_avg = self.__compute_historical_avg(df)
+        df_with_max = self.__identify_max_temp_day(df_with_avg)
 
-        return df_with_avg
+        return df_with_max
 
 
 def main():

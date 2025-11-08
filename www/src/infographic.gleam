@@ -375,6 +375,12 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
                       square_size,
                       gap,
                     ),
+                    render_max_temp_highlight(
+                      month_samples,
+                      0,
+                      square_size,
+                      gap,
+                    ),
                   ]),
                 ),
               ]
@@ -419,6 +425,27 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
       ),
     ],
   )
+}
+
+fn render_max_temp_highlight(
+  samples: List(model.Sample),
+  month_index: Int,
+  square_size: Int,
+  gap: Int,
+) -> List(Element(msg)) {
+  list.filter_map(samples, fn(sample) {
+    case sample.is_maximum {
+      True ->
+        Ok(render_highlight(
+          sample,
+          color.max_temp_highlight,
+          month_index,
+          square_size,
+          gap,
+        ))
+      False -> Error(Nil)
+    }
+  })
 }
 
 fn render_month_paths_single_row(
@@ -466,6 +493,16 @@ fn render_month_event_highlights(
 
 fn render_event_highlight(
   sample: model.Sample,
+  month_index: Int,
+  square_size: Int,
+  gap: Int,
+) -> Element(msg) {
+  render_highlight(sample, color.event_highlight, month_index, square_size, gap)
+}
+
+fn render_highlight(
+  sample: model.Sample,
+  color: String,
   month_index: Int,
   square_size: Int,
   gap: Int,
@@ -550,7 +587,7 @@ fn render_event_highlight(
     [
       attribute.attribute("d", path_data),
       attribute.attribute("fill", "none"),
-      attribute.attribute("stroke", color.highlight),
+      attribute.attribute("stroke", color),
       attribute.attribute("stroke-width", int.to_string(stroke_width)),
       attribute.attribute("class", "event-highlight"),
       attribute.styles([#("pointer-events", "none")]),
@@ -746,7 +783,7 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
       attribute.class("event-card"),
       attribute.styles([
         #("background", "white"),
-        #("border", "2px solid " <> color.highlight),
+        #("border", "2px solid " <> color.event_highlight),
         #("border-radius", "8px"),
         #("padding", "0.75rem"),
         #("box-shadow", "0 2px 8px rgba(0,0,0,0.1)"),
@@ -759,7 +796,7 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
           attribute.styles([
             #("margin", "0 0 0.25rem 0"),
             #("font-size", "0.85rem"),
-            #("color", color.highlight),
+            #("color", color.event_highlight),
           ]),
         ],
         [html.text(event.display_name)],
@@ -798,7 +835,7 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
           attribute.target("_blank"),
           attribute.styles([
             #("font-size", "0.7rem"),
-            #("color", color.highlight),
+            #("color", color.event_highlight),
             #("text-decoration", "none"),
           ]),
         ],
