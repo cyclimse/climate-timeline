@@ -25,6 +25,8 @@ jobs:
           name: ${{ needs.build.outputs.artifact-name }}
           path: dist/
 
+      - uses: actions/checkout@v4 # Checkout is needed by the preview action
+
       - name: Deploy preview
         uses: rossjrw/pr-preview-action@v1
         with:
