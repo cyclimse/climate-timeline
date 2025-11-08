@@ -4,7 +4,6 @@ import gleam/int
 import gleam/list
 import gleam/option
 import gleam/result
-import gleam/string
 import gleam/time/calendar
 
 import lustre/attribute
@@ -13,6 +12,61 @@ import lustre/element/html
 
 import color
 import model
+import svg
+
+// Visual layout constants
+const square_size = 12
+
+const gap = 3
+
+const cell_radius = 2
+
+const highlight_stroke_width = 3
+
+const legend_height = 20
+
+const max_days_in_month = 31
+
+// Temperature scale constants
+const temp_min = -10.0
+
+const temp_max = 35.0
+
+const temp_range = 45.0
+
+const hue_min = 0.0
+
+const hue_max = 180.0
+
+// Color intensity constants
+const max_deviation_threshold = 5.0
+
+const saturation_base = 50.0
+
+const saturation_range = 50.0
+
+const lightness_base = 70.0
+
+const lightness_range = 30.0
+
+const default_saturation = 60.0
+
+const default_lightness = 55.0
+
+const calendar_months = [
+  calendar.January,
+  calendar.February,
+  calendar.March,
+  calendar.April,
+  calendar.May,
+  calendar.June,
+  calendar.July,
+  calendar.August,
+  calendar.September,
+  calendar.October,
+  calendar.November,
+  calendar.December,
+]
 
 pub fn from(samples: List(model.Sample)) -> Element(msg) {
   let years =
@@ -79,8 +133,6 @@ pub fn from(samples: List(model.Sample)) -> Element(msg) {
 }
 
 fn render_temperature_legend() -> Element(msg) {
-  let legend_height = 20
-
   html.div(
     [
       attribute.styles([
@@ -235,8 +287,6 @@ fn render_heatmap(samples: List(model.Sample)) -> Element(msg) {
 }
 
 fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
-  let square_size = 12
-  let gap = 3
   let cell_size = square_size + gap
 
   // Group samples by month
@@ -260,27 +310,13 @@ fn render_year_heatmap(year: Int, samples: List(model.Sample)) -> Element(msg) {
     year_events
     |> list.group(fn(event) { event.date.month })
 
-  // Get all 12 months in order
+  // Generate month labels
   let months =
-    [
-      calendar.January,
-      calendar.February,
-      calendar.March,
-      calendar.April,
-      calendar.May,
-      calendar.June,
-      calendar.July,
-      calendar.August,
-      calendar.September,
-      calendar.October,
-      calendar.November,
-      calendar.December,
-    ]
+    calendar_months
     |> list.map(fn(month) { #(month, month_short_name(month)) })
 
   // Calculate max days in any month (31) for consistent width
-  let max_days = 31
-  let svg_width = max_days * cell_size
+  let svg_width = max_days_in_month * cell_size
 
   html.div(
     [
@@ -536,6 +572,19 @@ fn render_month_event_highlights(
   })
 }
 
+/// Calculate the position of a cell in the heatmap
+fn calculate_cell_position(
+  day: Int,
+  month_index: Int,
+  square_size: Int,
+  gap: Int,
+) -> #(Int, Int) {
+  let cell_size = square_size + gap
+  let x = { day - 1 } * cell_size
+  let y = month_index * cell_size
+  #(x, y)
+}
+
 fn render_event_highlight(
   sample: model.Sample,
   month_index: Int,
@@ -552,93 +601,12 @@ fn render_highlight(
   square_size: Int,
   gap: Int,
 ) -> Element(msg) {
-  let cell_size = square_size + gap
-  let y_offset = month_index * cell_size
-  let day = sample.date.day
-  let x = { day - 1 } * cell_size
-  let y = y_offset
-
-  let stroke_width = 3
-  let radius = 2
-
-  // Create a rounded rectangle outline for the event highlight
-  let x_str = int.to_string(x)
-  let y_str = int.to_string(y)
-  let x_r_str = int.to_string(x + radius)
-  let y_r_str = int.to_string(y + radius)
-  let x_w_str = int.to_string(x + square_size)
-  let y_h_str = int.to_string(y + square_size)
-  let x_w_r_str = int.to_string(x + square_size - radius)
-  let y_h_r_str = int.to_string(y + square_size - radius)
-
+  let #(x, y) =
+    calculate_cell_position(sample.date.day, month_index, square_size, gap)
   let path_data =
-    "M"
-    <> x_r_str
-    <> ","
-    <> y_str
-    <> " L"
-    <> x_w_r_str
-    <> ","
-    <> y_str
-    <> " Q"
-    <> x_w_str
-    <> ","
-    <> y_str
-    <> " "
-    <> x_w_str
-    <> ","
-    <> y_r_str
-    <> " L"
-    <> x_w_str
-    <> ","
-    <> y_h_r_str
-    <> " Q"
-    <> x_w_str
-    <> ","
-    <> y_h_str
-    <> " "
-    <> x_w_r_str
-    <> ","
-    <> y_h_str
-    <> " L"
-    <> x_r_str
-    <> ","
-    <> y_h_str
-    <> " Q"
-    <> x_str
-    <> ","
-    <> y_h_str
-    <> " "
-    <> x_str
-    <> ","
-    <> y_h_r_str
-    <> " L"
-    <> x_str
-    <> ","
-    <> y_r_str
-    <> " Q"
-    <> x_str
-    <> ","
-    <> y_str
-    <> " "
-    <> x_r_str
-    <> ","
-    <> y_str
-    <> " Z"
+    svg.rounded_rect_path(x, y, square_size, square_size, cell_radius)
 
-  element.namespaced(
-    "http://www.w3.org/2000/svg",
-    "path",
-    [
-      attribute.attribute("d", path_data),
-      attribute.attribute("fill", "none"),
-      attribute.attribute("stroke", color),
-      attribute.attribute("stroke-width", int.to_string(stroke_width)),
-      attribute.attribute("class", "event-highlight"),
-      attribute.styles([#("pointer-events", "none")]),
-    ],
-    [],
-  )
+  svg.path_stroked(path_data, color, highlight_stroke_width)
 }
 
 fn render_month_color_path(
@@ -648,95 +616,17 @@ fn render_month_color_path(
   square_size: Int,
   gap: Int,
 ) -> Element(msg) {
-  let cell_size = square_size + gap
-  let y_offset = month_index * cell_size
-  let radius = 2
-
   // Build path data for all rectangles of this color in this month
   let path_data =
     samples
     |> list.map(fn(sample) {
-      let day = sample.date.day
-      let x = { day - 1 } * cell_size
-      let y = y_offset
-
-      // Create a rounded rectangle path for this cell
-      let x_str = int.to_string(x)
-      let y_str = int.to_string(y)
-      let x_r_str = int.to_string(x + radius)
-      let y_r_str = int.to_string(y + radius)
-      let x_w_str = int.to_string(x + square_size)
-      let y_h_str = int.to_string(y + square_size)
-      let x_w_r_str = int.to_string(x + square_size - radius)
-      let y_h_r_str = int.to_string(y + square_size - radius)
-
-      // Draw rounded rectangle path
-      "M"
-      <> x_r_str
-      <> ","
-      <> y_str
-      <> " L"
-      <> x_w_r_str
-      <> ","
-      <> y_str
-      <> " Q"
-      <> x_w_str
-      <> ","
-      <> y_str
-      <> " "
-      <> x_w_str
-      <> ","
-      <> y_r_str
-      <> " L"
-      <> x_w_str
-      <> ","
-      <> y_h_r_str
-      <> " Q"
-      <> x_w_str
-      <> ","
-      <> y_h_str
-      <> " "
-      <> x_w_r_str
-      <> ","
-      <> y_h_str
-      <> " L"
-      <> x_r_str
-      <> ","
-      <> y_h_str
-      <> " Q"
-      <> x_str
-      <> ","
-      <> y_h_str
-      <> " "
-      <> x_str
-      <> ","
-      <> y_h_r_str
-      <> " L"
-      <> x_str
-      <> ","
-      <> y_r_str
-      <> " Q"
-      <> x_str
-      <> ","
-      <> y_str
-      <> " "
-      <> x_r_str
-      <> ","
-      <> y_str
-      <> " Z"
+      let #(x, y) =
+        calculate_cell_position(sample.date.day, month_index, square_size, gap)
+      svg.rounded_rect_path(x, y, square_size, square_size, cell_radius)
     })
-    |> string.join(" ")
+    |> svg.join_paths
 
-  element.namespaced(
-    "http://www.w3.org/2000/svg",
-    "path",
-    [
-      attribute.attribute("d", path_data),
-      attribute.attribute("fill", color),
-      attribute.styles([#("cursor", "pointer")]),
-    ],
-    [],
-  )
+  svg.path_filled(path_data, color)
 }
 
 fn temperature_to_color(sample: model.Sample) -> String {
@@ -744,14 +634,15 @@ fn temperature_to_color(sample: model.Sample) -> String {
 
   // Calculate hue: teal (180) at -10°C to red (0) at 35°C
   // Linear interpolation
-  let hue = case temp <=. -10.0 {
-    True -> 180.0
+  let hue = case temp <=. temp_min {
+    True -> hue_max
     False ->
-      case temp >=. 35.0 {
-        True -> 0.0
+      case temp >=. temp_max {
+        True -> hue_min
         False -> {
-          let normalized = { temp +. 10.0 } /. 45.0
-          180.0 -. { normalized *. 180.0 }
+          let normalized =
+            { temp +. float.absolute_value(temp_min) } /. temp_range
+          hue_max -. { normalized *. hue_max }
         }
       }
   }
@@ -765,30 +656,29 @@ fn temperature_to_color(sample: model.Sample) -> String {
 
       // More deviation = more intense color (higher saturation, lower lightness)
       // Deviation of 0°C -> lighter, 5°C+ -> most intense
-      let intensity = case deviation >=. 5.0 {
+      let intensity = case deviation >=. max_deviation_threshold {
         True -> 1.0
-        False -> deviation /. 5.0
+        False -> deviation /. max_deviation_threshold
       }
 
-      let saturation = 50.0 +. { intensity *. 50.0 }
-      let lightness = 70.0 -. { intensity *. 30.0 }
+      let saturation = saturation_base +. { intensity *. saturation_range }
+      let lightness = lightness_base -. { intensity *. lightness_range }
 
       #(saturation, lightness)
     }
     option.None -> {
       // No historical data - use medium intensity
-      #(60.0, 55.0)
+      #(default_saturation, default_lightness)
     }
   }
 
   // Quantize colors to reduce number of unique colors
   // This creates a palette of ~32 colors by rounding to nearest steps
-  let quantized_hue = quantize_value(hue, 15.0)
-  // Round to nearest 15 degrees
-  let quantized_saturation = quantize_value(saturation, 10.0)
-  // Round to nearest 10%
-  let quantized_lightness = quantize_value(lightness, 5.0)
-  // Round to nearest 5%
+  let quantized_hue = color.quantize_value(hue, color.hue_quantize_step)
+  let quantized_saturation =
+    color.quantize_value(saturation, color.saturation_quantize_step)
+  let quantized_lightness =
+    color.quantize_value(lightness, color.lightness_quantize_step)
 
   "hsl("
   <> float.to_string(quantized_hue)
@@ -797,14 +687,6 @@ fn temperature_to_color(sample: model.Sample) -> String {
   <> "%, "
   <> float.to_string(quantized_lightness)
   <> "%)"
-}
-
-fn quantize_value(value: Float, step: Float) -> Float {
-  let rounded = {
-    value /. step
-  }
-  let rounded_int = float.round(rounded)
-  int.to_float(rounded_int) *. step
 }
 
 fn render_max_temp_indicator_left(sample: model.Sample) -> Element(msg) {
@@ -900,24 +782,6 @@ fn render_max_temp_indicator_left(sample: model.Sample) -> Element(msg) {
   )
 }
 
-fn month_short_name(month: calendar.Month) -> String {
-  let month_str = case month {
-    calendar.January -> "Jan"
-    calendar.February -> "Feb"
-    calendar.March -> "Mar"
-    calendar.April -> "Apr"
-    calendar.May -> "May"
-    calendar.June -> "Jun"
-    calendar.July -> "Jul"
-    calendar.August -> "Aug"
-    calendar.September -> "Sep"
-    calendar.October -> "Oct"
-    calendar.November -> "Nov"
-    calendar.December -> "Dec"
-  }
-  month_str
-}
-
 fn render_event_card_inline(event: model.Event) -> Element(msg) {
   html.div(
     [
@@ -984,4 +848,21 @@ fn render_event_card_inline(event: model.Event) -> Element(msg) {
       ),
     ],
   )
+}
+
+fn month_short_name(month: calendar.Month) -> String {
+  case month {
+    calendar.January -> "Jan"
+    calendar.February -> "Feb"
+    calendar.March -> "Mar"
+    calendar.April -> "Apr"
+    calendar.May -> "May"
+    calendar.June -> "Jun"
+    calendar.July -> "Jul"
+    calendar.August -> "Aug"
+    calendar.September -> "Sep"
+    calendar.October -> "Oct"
+    calendar.November -> "Nov"
+    calendar.December -> "Dec"
+  }
 }
