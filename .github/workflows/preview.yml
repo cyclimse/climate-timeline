@@ -18,7 +18,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needs to push to gh-pages branch
+      contents: write # Needed to push to gh-pages branch
+      pull-requests: write # Needed to comment on PRs
 
     steps:
       - uses: actions/checkout@v4 # Checkout is needed by the preview action
