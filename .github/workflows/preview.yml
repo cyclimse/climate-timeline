@@ -22,7 +22,7 @@ jobs:
       pull-requests: write # Needed to comment on PRs
 
     steps:
-      - uses: actions/checkout@v4 # Checkout is needed by the preview action
+      - uses: actions/checkout@v5 # Checkout is needed by the preview action
 
       # Order matters: checkout will remove the dist/ directory, so we need to
       # download the artifact after checking out.
