@@ -16,6 +16,8 @@ pub type Sample {
     date: calendar.Date,
     temperature_celsius: Float,
     historical_average_temperature_celsius: Option(Float),
+    max_temperature_celsius: Float,
+    is_maximum: Bool,
     event: Option(Event),
   )
 }
@@ -39,10 +41,18 @@ fn sample_decoder() -> decode.Decoder(Sample) {
     "historical_average_temperature_celsius",
     decode.optional(decode.float),
   )
+  use max_temperature_celsius <- decode.field(
+    "max_temperature_celsius",
+    decode.float,
+  )
+  use is_maximum <- decode.field("is_maximum", decode.bool)
+
   decode.success(Sample(
     date:,
     temperature_celsius:,
     historical_average_temperature_celsius:,
+    max_temperature_celsius:,
+    is_maximum:,
     event: option.None,
   ))
 }
@@ -51,12 +61,14 @@ pub fn read_samples_from_file(file_path: String) -> Result(List(Sample)) {
   use data <- result.try(
     simplifile.read(file_path) |> snag.map_error(simplifile.describe_error),
   )
+
   use samples <- result.try(
     json.parse(data, decode.list(sample_decoder()))
     |> snag.map_error(fn(e) {
       "decoding samples from " <> file_path <> ": " <> string.inspect(e)
     }),
   )
+
   Ok(samples)
 }
 
