@@ -19,13 +19,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4 # Checkout is needed by the preview action
+
+      # Order matters: checkout will remove the dist/ directory, so we need to
+      # download the artifact after checking out.
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.artifact-name }}
           path: dist/
-
-      - uses: actions/checkout@v4 # Checkout is needed by the preview action
 
       - name: Deploy preview
         uses: rossjrw/pr-preview-action@v1
