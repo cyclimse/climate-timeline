@@ -204,14 +204,14 @@ wheels = [
 
 [[package]]
 name = "openmeteo-sdk"
-version = "1.22.0"
+version = "1.23.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "flatbuffers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9d/63/05cae4939f8258e4702814608f4943dfb6aaf2b8e485c537bfa081266806/openmeteo_sdk-1.22.0.tar.gz", hash = "sha256:b6c0a3347bef19140e95ac74a52b4eab683944b76f562c456201cb5a1956ee1f", size = 11733, upload-time = "2025-10-30T16:37:26.974Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/57/8c/e748d5bacbaa435fce10a1ad2e71c0b947d2c89bae1748938c0229a947c1/openmeteo_sdk-1.23.0.tar.gz", hash = "sha256:2f860b4635bed5acc2c9cee94c22dc563ad906e3d68f270d3e75fc03d9b423f1", size = 11753, upload-time = "2025-11-10T10:25:56.91Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d5/71/d8ad8ced33657e8c3c4c7a0d29c7beece101f2fed4765a2728185c367de1/openmeteo_sdk-1.22.0-py3-none-any.whl", hash = "sha256:2ad976ba37c534051c3b4fb78d6d9043557f240ced4b0655e75dce9760468397", size = 18743, upload-time = "2025-10-30T16:37:25.9Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/1d/5603655de6c3cd6429818fdbde46125be7c961c0e31fd550cc214fcf0a29/openmeteo_sdk-1.23.0-py3-none-any.whl", hash = "sha256:865f51ef29161487b7698ed5a9fffa730aab46df47701243aa12375bb8cd92d1", size = 18769, upload-time = "2025-11-10T10:25:55.666Z" },
 ]
 
 [[package]]
