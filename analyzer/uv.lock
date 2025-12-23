@@ -147,16 +147,16 @@ wheels = [
 
 [[package]]
 name = "niquests"
-version = "3.15.2"
+version = "3.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "charset-normalizer" },
     { name = "urllib3-future" },
     { name = "wassima" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/86/f9/b472d4aae737686c88154bedf6a8939cf8f191e30df0ad904ca6b614b437/niquests-3.15.2.tar.gz", hash = "sha256:8076b1d2ff957022d52b2216ca7df92d92ce426d19a7ed63c7fd4fd630ab6c2b", size = 975234, upload-time = "2025-08-16T14:06:03.755Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ab/71/23eebdefe8c449d2c61a5ac79b9485e48fd94a862a1cd04093216ed8dd3c/niquests-3.16.0.tar.gz", hash = "sha256:87bc5636240bd5c32aacece7c1627d6778704db667e665f6468d8cd3c497e83a", size = 981025, upload-time = "2025-12-23T09:12:29.477Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/71/c82f55feb3197b3c2e0699f3c961d20806a3199b0b15190d4ced13e2ecc1/niquests-3.15.2-py3-none-any.whl", hash = "sha256:2446e3602ba1418434822f5c1fcf8b8d1b52a3c296d2808a1ab7de4cf1312d99", size = 167060, upload-time = "2025-08-16T14:06:01.758Z" },
+    { url = "https://files.pythonhosted.org/packages/b6/b5/00c98d853c50c0ce9822f89e83185fefdc9696089da6868ee84dd0f3a43b/niquests-3.16.0-py3-none-any.whl", hash = "sha256:6bc1697a923a081c42e26283118c4dad401e057177fd873801868098a946c20b", size = 170830, upload-time = "2025-12-23T09:12:27.894Z" },
 ]
 
 [[package]]
