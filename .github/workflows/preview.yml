@@ -27,7 +27,7 @@ jobs:
       # Order matters: checkout will remove the dist/ directory, so we need to
       # download the artifact after checking out.
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ needs.build.outputs.artifact-name }}
           path: dist/
