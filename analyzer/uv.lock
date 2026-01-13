@@ -378,9 +378,9 @@ wheels = [
 
 [[package]]
 name = "wassima"
-version = "2.0.3"
+version = "2.0.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6f/1a/992d314e789b41513a285d28a4268cd9228a029a7913d976575f174d8c13/wassima-2.0.3.tar.gz", hash = "sha256:f86578e33e46e12352964ced83ec5a739ff77791e96224f980a043fa5ac563e8", size = 149031, upload-time = "2025-12-16T07:27:37.192Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/16/a6/c1dfa581b7bc42d2f7bf185dd78bf8947f19f339b49fb5f70c7ca4c7cd62/wassima-2.0.4.tar.gz", hash = "sha256:45bbceb4032e642100b9eef3e2f83115ec5cbbc02c68355e5b2320986ba224ee", size = 149085, upload-time = "2026-01-13T04:44:56.787Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/25/b1/52cb74011569cbc57dae499ed8d317098976bd22246b0e464282d3c1651f/wassima-2.0.3-py3-none-any.whl", hash = "sha256:019e0810ca643c5a63fe6f0a46c9a660200abd9588c07ba1fdff2545ade2aa1c", size = 144270, upload-time = "2025-12-16T07:27:35.735Z" },
+    { url = "https://files.pythonhosted.org/packages/32/03/89b643ec91be9ce087ff8b87e703e132b8aa016a99a2cf5c6e9010f12579/wassima-2.0.4-py3-none-any.whl", hash = "sha256:7ed775e0df7f60a0814943167b195eea458b14d8dcc1b8d0fa5a8fc6a5029e20", size = 144269, upload-time = "2026-01-13T04:44:55.125Z" },
 ]
