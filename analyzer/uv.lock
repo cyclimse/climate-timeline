@@ -216,11 +216,11 @@ wheels = [
 
 [[package]]
 name = "platformdirs"
-version = "4.9.0"
+version = "4.9.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d6/f3/1632085bda21cae242998e27f63d3a2c02cdcdb36cade334fa689f210903/platformdirs-4.9.0.tar.gz", hash = "sha256:d8c98e89c427a101947441c7e77b4cd1c8ea717de6f3885e2aa9c73fce276207", size = 28346, upload-time = "2026-02-14T17:15:37.23Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1b/04/fea538adf7dbbd6d186f551d595961e564a3b6715bdf276b477460858672/platformdirs-4.9.2.tar.gz", hash = "sha256:9a33809944b9db043ad67ca0db94b14bf452cc6aeaac46a88ea55b26e2e9d291", size = 28394, upload-time = "2026-02-16T03:56:10.574Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c8/29/d2387317b99bd77344b23d35c7418eb7971cb9000d65209afcbe3a38a539/platformdirs-4.9.0-py3-none-any.whl", hash = "sha256:b02ef5c8ddacd466a19decb2390e52f48ae49a5c41f55646cc45e85320d9aff7", size = 21216, upload-time = "2026-02-14T17:15:35.378Z" },
+    { url = "https://files.pythonhosted.org/packages/48/31/05e764397056194206169869b50cf2fee4dbbbc71b344705b9c0d878d4d8/platformdirs-4.9.2-py3-none-any.whl", hash = "sha256:9170634f126f8efdae22fb58ae8a0eaa86f38365bc57897a6c4f781d1f5875bd", size = 21168, upload-time = "2026-02-16T03:56:08.891Z" },
 ]
 
 [[package]]
