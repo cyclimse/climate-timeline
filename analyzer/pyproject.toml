@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = "==3.14.4"
 dependencies = [
     "numpy==2.3.4",
-    "openmeteo-requests==1.7.4",
+    "openmeteo-requests==1.7.5",
     "polars==1.35.1",
     "requests-cache==1.2.1",
     "retry-requests==2.0.0",
