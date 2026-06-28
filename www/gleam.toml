@@ -23,4 +23,4 @@ gleam_json = "== 3.1.0"
 taskle = "== 2.0.0"
 
 [dev-dependencies]
-gleeunit = "== 1.9.0"
+gleeunit = "== 1.11.0"
