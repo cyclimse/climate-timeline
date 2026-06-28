@@ -13,6 +13,7 @@
   };
   languages.python = {
     enable = true;
+    package = pkgs.python314;
     uv.enable = true;
   };
 
