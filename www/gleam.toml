@@ -13,7 +13,7 @@ version = "1.0.0"
 # https://gleam.run/writing-gleam/gleam-toml/.
 
 [dependencies]
-gleam_stdlib = "== 0.65.0"
+gleam_stdlib = "== 0.71.0"
 gleam_time = "== 1.8.0"
 lustre = "== 5.6.0"
 simplifile = "== 2.4.0"
